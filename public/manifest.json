@@ -1,0 +1,22 @@
+{
+  "name": "맛집 지도",
+  "short_name": "맛집지도",
+  "description": "전국 모범식당 & 블루리본 맛집을 한눈에",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

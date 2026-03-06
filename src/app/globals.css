@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+/* Safe area insets for iPhone notch/home indicator */
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* 하단 시트 슬라이드 업 애니메이션 */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* 스크롤바 숨기기 (필터 패널용) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* dvh (dynamic viewport height) 지원 */
+.h-dvh {
+  height: 100dvh;
+}
+
+@supports not (height: 100dvh) {
+  .h-dvh {
+    height: 100vh;
+  }
+}
+
+/* Leaflet 커스텀 마커 */
+.custom-marker,
+.location-marker {
+  background: none !important;
+  border: none !important;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(66, 133, 244, 0.1),
+      0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.3),
+      0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Leaflet 팝업 스타일 오버라이드 */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* 주사위 셰이크 애니메이션 */
+@keyframes shake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-15deg); }
+  30% { transform: rotate(15deg); }
+  45% { transform: rotate(-10deg); }
+  60% { transform: rotate(10deg); }
+  75% { transform: rotate(-5deg); }
+  90% { transform: rotate(5deg); }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
