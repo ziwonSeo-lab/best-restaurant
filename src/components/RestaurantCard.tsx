@@ -177,26 +177,6 @@ export default function RestaurantCard({
             </svg>
             네이버지도
           </a>
-          <a
-            href={`https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-              flex items-center justify-center gap-1.5
-              px-4 py-2.5 rounded-lg
-              bg-[#FEE500] text-[#3C1E1E] text-sm font-medium
-              hover:bg-[#fdd800] active:bg-[#f5d000] transition-colors
-            "
-          >
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-                clipRule="evenodd"
-              />
-            </svg>
-            카카오맵
-          </a>
           {restaurant.phone && (
             <a
               href={`tel:${restaurant.phone}`}
