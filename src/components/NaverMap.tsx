@@ -392,7 +392,6 @@ export default function LeafletMap({
               }
             } else {
               requestLocation()
-              setRadiusFilter(1000)
             }
           }}
           disabled={isLocating}
