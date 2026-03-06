@@ -121,66 +121,60 @@ export default function FilterPanel() {
         >
           ⭐ 즐겨찾기 ({favoriteIds.length})
         </button>
-      </div>
-
-      {/* 음식유형 토글 + 필터 */}
-      {foodTypes.length > 0 && (
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-0.5 px-1 items-center">
+        {foodTypes.length > 0 && (
           <button
             onClick={() => {
-              if (showFoodTypes) {
-                setFoodType('')
-              }
+              if (showFoodTypes) setFoodType('')
               setShowFoodTypes(!showFoodTypes)
             }}
             className={`
-              flex-shrink-0 w-7 h-7 rounded-full text-sm font-medium
-              flex items-center justify-center
+              flex-shrink-0 px-3 py-2 rounded-full text-sm font-medium
               transition-all duration-200
-              ${showFoodTypes
+              ${showFoodTypes || selectedFoodType
                 ? 'bg-blue-500 text-white shadow-sm'
                 : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }
             `}
-            title="음식 종류 필터"
           >
-            {showFoodTypes ? '−' : '+'}
+            {showFoodTypes ? '종류 ✕' : selectedFoodType ? `종류: ${selectedFoodType}` : '종류 +'}
           </button>
-          {showFoodTypes && (
-            <>
-              <button
-                onClick={() => setFoodType('')}
-                className={`
-                  flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium
-                  transition-all duration-200
-                  ${
-                    selectedFoodType === ''
-                      ? 'bg-blue-500 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }
-                `}
-              >
-                전체 ({sourceFilteredRestaurants.length})
-              </button>
-              {foodTypes.map(({ type, count }) => (
-                <button
-                  key={type}
-                  onClick={() => setFoodType(type === selectedFoodType ? '' : type)}
-                  className={`
-                    flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium
-                    transition-all duration-200
-                    ${
-                      selectedFoodType === type
-                        ? 'bg-blue-500 text-white shadow-sm'
-                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                    }
-                  `}
-                >
-                  {type} ({count})
-                </button>
-              ))}
-            </>
-          )}
+        )}
+      </div>
+
+      {/* 음식유형 필터 (펼침) */}
+      {showFoodTypes && foodTypes.length > 0 && (
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-0.5 px-1">
+          <button
+            onClick={() => setFoodType('')}
+            className={`
+              flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium
+              transition-all duration-200
+              ${
+                selectedFoodType === ''
+                  ? 'bg-blue-500 text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }
+            `}
+          >
+            전체 ({sourceFilteredRestaurants.length})
+          </button>
+          {foodTypes.map(({ type, count }) => (
+            <button
+              key={type}
+              onClick={() => setFoodType(type === selectedFoodType ? '' : type)}
+              className={`
+                flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium
+                transition-all duration-200
+                ${
+                  selectedFoodType === type
+                    ? 'bg-blue-500 text-white shadow-sm'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }
+              `}
+            >
+              {type} ({count})
+            </button>
+          ))}
         </div>
       )}
     </div>
