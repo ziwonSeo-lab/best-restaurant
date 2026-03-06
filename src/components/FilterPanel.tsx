@@ -47,7 +47,7 @@ export default function FilterPanel() {
       {/* 소스 필터 */}
       <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-0.5 px-1">
         <button
-          onClick={() => setSource('')}
+          onClick={() => { setSource(''); setShowFavoritesOnly(false) }}
           className={`
             flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium
             transition-all duration-200
@@ -61,7 +61,7 @@ export default function FilterPanel() {
           전체 ({sourceCounts.total})
         </button>
         <button
-          onClick={() => setSource(selectedSource === 'model' ? '' : 'model')}
+          onClick={() => { setSource(selectedSource === 'model' ? '' : 'model'); setShowFavoritesOnly(false) }}
           title="지자체가 위생·서비스 우수 업소로 지정한 모범음식점"
           className={`
             flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium
@@ -76,7 +76,7 @@ export default function FilterPanel() {
           🏅 모범식당 ({sourceCounts.model})
         </button>
         <button
-          onClick={() => setSource(selectedSource === 'blueribbon' ? '' : 'blueribbon')}
+          onClick={() => { setSource(selectedSource === 'blueribbon' ? '' : 'blueribbon'); setShowFavoritesOnly(false) }}
           title="블루리본 서베이 선정, 전문가 평가 기반 맛집 가이드"
           className={`
             flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium
@@ -91,7 +91,7 @@ export default function FilterPanel() {
           🎀 블루리본 ({sourceCounts.blueribbon})
         </button>
         <button
-          onClick={() => setSource(selectedSource === 'bibgourmand' ? '' : 'bibgourmand')}
+          onClick={() => { setSource(selectedSource === 'bibgourmand' ? '' : 'bibgourmand'); setShowFavoritesOnly(false) }}
           title="미쉐린 빕 구르망, 합리적 가격에 훌륭한 음식을 제공하는 식당"
           className={`
             flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium
@@ -106,7 +106,7 @@ export default function FilterPanel() {
           🌸 빕구르망 ({sourceCounts.bibgourmand})
         </button>
         <button
-          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          onClick={() => { setShowFavoritesOnly(!showFavoritesOnly); setSource('') }}
           className={`
             flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium
             transition-all duration-200
