@@ -158,7 +158,7 @@ export default function RestaurantCard({
         {/* 액션 버튼 */}
         <div className="flex gap-2 mt-4">
           <a
-            href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name)}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh&lat=${restaurant.lat}&lng=${restaurant.lng}`}
+            href={`https://map.naver.com/p/search/${encodeURIComponent(`${restaurant.name} ${restaurant.address || restaurant.jibunAddress}`)}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh`}
             target="_blank"
             rel="noopener noreferrer"
             className="
@@ -178,7 +178,7 @@ export default function RestaurantCard({
             네이버지도
           </a>
           <a
-            href={`https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`}
+            href={`https://map.kakao.com/?q=${encodeURIComponent(`${restaurant.name} ${restaurant.address || restaurant.jibunAddress}`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="
