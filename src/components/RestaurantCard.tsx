@@ -178,7 +178,7 @@ export default function RestaurantCard({
             네이버지도
           </a>
           <a
-            href={`https://map.kakao.com/link/search/${encodeURIComponent(restaurant.name)}`}
+            href={`https://map.kakao.com/?q=${encodeURIComponent(restaurant.name)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="
