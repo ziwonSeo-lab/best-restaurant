@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import type { Restaurant, RestaurantSource } from '@/lib/types'
 import { REGIONS, DEFAULT_REGION } from '@/lib/regions'
 
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH || ''
+
 interface RestaurantState {
   allRestaurants: Restaurant[]
   availableRegions: string[]
@@ -95,9 +97,9 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
 
     try {
       const [modelRes, blueribbonRes, bibgourmandRes] = await Promise.allSettled([
-        fetch(`/data/${region}.json`),
-        fetch(`/data/blueribbon-${region}.json`),
-        fetch(`/data/bibgourmand-${region}.json`),
+        fetch(`${BASE_PATH}/data/${region}.json`),
+        fetch(`${BASE_PATH}/data/blueribbon-${region}.json`),
+        fetch(`${BASE_PATH}/data/bibgourmand-${region}.json`),
       ])
 
       const restaurants: Restaurant[] = []
@@ -148,9 +150,9 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
       keys.map(async (key) => {
         try {
           const [modelRes, blueribbonRes, bibgourmandRes] = await Promise.all([
-            fetch(`/data/${key}.json`, { method: 'HEAD' }).catch(() => null),
-            fetch(`/data/blueribbon-${key}.json`, { method: 'HEAD' }).catch(() => null),
-            fetch(`/data/bibgourmand-${key}.json`, { method: 'HEAD' }).catch(() => null),
+            fetch(`${BASE_PATH}/data/${key}.json`, { method: 'HEAD' }).catch(() => null),
+            fetch(`${BASE_PATH}/data/blueribbon-${key}.json`, { method: 'HEAD' }).catch(() => null),
+            fetch(`${BASE_PATH}/data/bibgourmand-${key}.json`, { method: 'HEAD' }).catch(() => null),
           ])
           return (modelRes?.ok || blueribbonRes?.ok || bibgourmandRes?.ok) ? key : null
         } catch {
