@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useRestaurantStore } from '@/store/restaurant-store'
 import { useFavoritesStore } from '@/store/favorites-store'
 
@@ -13,6 +13,8 @@ export default function FilterPanel() {
   const favoriteIds = useFavoritesStore((s) => s.favoriteIds)
   const showFavoritesOnly = useRestaurantStore((s) => s.showFavoritesOnly)
   const setShowFavoritesOnly = useRestaurantStore((s) => s.setShowFavoritesOnly)
+
+  const [showFoodTypes, setShowFoodTypes] = useState(false)
 
   const sourceCounts = useMemo(() => {
     let model = 0
@@ -121,40 +123,64 @@ export default function FilterPanel() {
         </button>
       </div>
 
-      {/* 음식유형 필터 */}
+      {/* 음식유형 토글 + 필터 */}
       {foodTypes.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide py-1 px-1">
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide py-0.5 px-1 items-center">
           <button
-            onClick={() => setFoodType('')}
+            onClick={() => {
+              if (showFoodTypes) {
+                setFoodType('')
+              }
+              setShowFoodTypes(!showFoodTypes)
+            }}
             className={`
-              flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium
+              flex-shrink-0 w-7 h-7 rounded-full text-sm font-medium
+              flex items-center justify-center
               transition-all duration-200
-              ${
-                selectedFoodType === ''
-                  ? 'bg-blue-500 text-white shadow-sm'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              ${showFoodTypes
+                ? 'bg-blue-500 text-white shadow-sm'
+                : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }
             `}
+            title="음식 종류 필터"
           >
-            전체 ({sourceFilteredRestaurants.length})
+            {showFoodTypes ? '−' : '+'}
           </button>
-          {foodTypes.map(({ type, count }) => (
-            <button
-              key={type}
-              onClick={() => setFoodType(type === selectedFoodType ? '' : type)}
-              className={`
-                flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium
-                transition-all duration-200
-                ${
-                  selectedFoodType === type
-                    ? 'bg-blue-500 text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }
-              `}
-            >
-              {type} ({count})
-            </button>
-          ))}
+          {showFoodTypes && (
+            <>
+              <button
+                onClick={() => setFoodType('')}
+                className={`
+                  flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium
+                  transition-all duration-200
+                  ${
+                    selectedFoodType === ''
+                      ? 'bg-blue-500 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }
+                `}
+              >
+                전체 ({sourceFilteredRestaurants.length})
+              </button>
+              {foodTypes.map(({ type, count }) => (
+                <button
+                  key={type}
+                  onClick={() => setFoodType(type === selectedFoodType ? '' : type)}
+                  className={`
+                    flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium
+                    transition-all duration-200
+                    ${
+                      selectedFoodType === type
+                        ? 'bg-blue-500 text-white shadow-sm'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }
+                  `}
+                >
+                  {type} ({count})
+                </button>
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
