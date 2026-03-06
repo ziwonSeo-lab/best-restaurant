@@ -158,7 +158,7 @@ export default function RestaurantCard({
         {/* 액션 버튼 */}
         <div className="flex gap-2 mt-4">
           <a
-            href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name)}?c=${restaurant.lng},${restaurant.lat},15,0,0,0,dh`}
+            href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name)}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh`}
             target="_blank"
             rel="noopener noreferrer"
             className="
