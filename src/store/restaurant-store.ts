@@ -20,6 +20,9 @@ interface RestaurantState {
   // 즐겨찾기 필터
   showFavoritesOnly: boolean
 
+  // 최근 지정 필터 (모범식당 5년 이내)
+  recentOnly: boolean
+
   // 지도 뷰포트 영역
   mapBounds: { south: number; north: number; west: number; east: number } | null
 
@@ -35,6 +38,7 @@ interface RestaurantState {
   setSearchQuery: (query: string) => void
   setSelectedRestaurant: (restaurant: Restaurant | null) => void
   setShowFavoritesOnly: (show: boolean) => void
+  toggleRecentOnly: () => void
   loadRestaurants: (region: string) => Promise<void>
   checkAvailableRegions: () => Promise<void>
 
@@ -65,6 +69,8 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
 
   showFavoritesOnly: false,
 
+  recentOnly: false,
+
   mapBounds: null,
 
   userLocation: null,
@@ -84,13 +90,15 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
   setFoodTypeFilter: (foodTypeFilter) => set({ foodTypeFilter }),
 
   setSourceFilter: (sourceFilter) =>
-    set({ sourceFilter, foodTypeFilter: '', selectedRestaurant: null }),
+    set({ sourceFilter, foodTypeFilter: '', selectedRestaurant: null, recentOnly: false }),
 
   setSearchQuery: (searchQuery) => set({ searchQuery, selectedRestaurant: null }),
 
   setSelectedRestaurant: (selectedRestaurant) => set({ selectedRestaurant }),
 
   setShowFavoritesOnly: (showFavoritesOnly) => set({ showFavoritesOnly }),
+
+  toggleRecentOnly: () => set((state) => ({ recentOnly: !state.recentOnly })),
 
   loadRestaurants: async (region) => {
     set({ isLoading: true, error: null })

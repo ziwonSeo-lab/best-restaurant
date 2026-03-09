@@ -2,6 +2,7 @@
 
 import type { Restaurant } from '@/lib/types'
 import { useFavoritesStore } from '@/store/favorites-store'
+import { formatDesignatedDate, isOlderThanYears } from '@/lib/date-utils'
 
 interface RestaurantCardProps {
   restaurant: Restaurant
@@ -118,12 +119,29 @@ export default function RestaurantCard({
           )}
 
           {/* 모범식당: 지정일 / 블루리본: 리뷰 / 빕 구르망: 설명 */}
-          {!isBlueRibbon && !isBibGourmand && restaurant.designatedDate && (
+          {!isBlueRibbon && !isBibGourmand && (
             <div className="flex items-center gap-2">
               <span className="text-gray-400 flex-shrink-0">🏅</span>
               <span className="text-sm text-gray-500">
-                모범음식점 지정일: {restaurant.designatedDate}
+                모범음식점 지정일: {formatDesignatedDate(restaurant.designatedDate || '')}
               </span>
+            </div>
+          )}
+
+          {/* 5년 이상 경과 경고 배너 */}
+          {!isBlueRibbon && !isBibGourmand && restaurant.designatedDate && isOlderThanYears(restaurant.designatedDate, 5) && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <p className="text-xs text-amber-700">
+                ⚠️ 지정일이 5년 이상 경과하여 상호 변경 가능성이 있습니다.{' '}
+                <a
+                  href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline font-medium"
+                >
+                  네이버지도에서 최신 정보 확인
+                </a>
+              </p>
             </div>
           )}
 

@@ -13,6 +13,8 @@ export default function FilterPanel() {
   const favoriteIds = useFavoritesStore((s) => s.favoriteIds)
   const showFavoritesOnly = useRestaurantStore((s) => s.showFavoritesOnly)
   const setShowFavoritesOnly = useRestaurantStore((s) => s.setShowFavoritesOnly)
+  const recentOnly = useRestaurantStore((s) => s.recentOnly)
+  const toggleRecentOnly = useRestaurantStore((s) => s.toggleRecentOnly)
 
   const [showFoodTypes, setShowFoodTypes] = useState(false)
 
@@ -77,6 +79,22 @@ export default function FilterPanel() {
         >
           🏅 모범식당 ({sourceCounts.model})
         </button>
+        {selectedSource === 'model' && (
+          <button
+            onClick={toggleRecentOnly}
+            className={`
+              flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium
+              transition-all duration-200
+              ${
+                recentOnly
+                  ? 'bg-emerald-600 text-white shadow-sm'
+                  : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+              }
+            `}
+          >
+            {recentOnly ? '최근 지정 ✓' : '최근 지정'}
+          </button>
+        )}
         <button
           onClick={() => { setSource(selectedSource === 'blueribbon' ? '' : 'blueribbon'); setShowFavoritesOnly(false) }}
           title="블루리본 서베이 선정, 전문가 평가 기반 맛집 가이드"

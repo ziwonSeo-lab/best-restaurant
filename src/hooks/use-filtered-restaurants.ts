@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useRestaurantStore } from '@/store/restaurant-store'
 import { useFavoritesStore } from '@/store/favorites-store'
 import { haversineDistance } from '@/lib/geo-utils'
+import { isOlderThanYears } from '@/lib/date-utils'
 
 export function useFilteredRestaurants() {
   const allRestaurants = useRestaurantStore((s) => s.allRestaurants)
@@ -11,6 +12,7 @@ export function useFilteredRestaurants() {
   const userLocation = useRestaurantStore((s) => s.userLocation)
   const radiusFilter = useRestaurantStore((s) => s.radiusFilter)
   const showFavoritesOnly = useRestaurantStore((s) => s.showFavoritesOnly)
+  const recentOnly = useRestaurantStore((s) => s.recentOnly)
   const favoriteIds = useFavoritesStore((s) => s.favoriteIds)
 
   return useMemo(() => {
@@ -22,6 +24,13 @@ export function useFilteredRestaurants() {
 
     if (sourceFilter) {
       data = data.filter((r) => r.source === sourceFilter)
+    }
+
+    if (recentOnly) {
+      data = data.filter((r) => {
+        if (r.source !== 'model') return true
+        return r.designatedDate ? !isOlderThanYears(r.designatedDate, 5) : false
+      })
     }
 
     if (foodTypeFilter) {
@@ -56,5 +65,5 @@ export function useFilteredRestaurants() {
     }
 
     return data
-  }, [allRestaurants, sourceFilter, foodTypeFilter, searchQuery, userLocation, radiusFilter, showFavoritesOnly, favoriteIds])
+  }, [allRestaurants, sourceFilter, foodTypeFilter, searchQuery, userLocation, radiusFilter, showFavoritesOnly, recentOnly, favoriteIds])
 }
