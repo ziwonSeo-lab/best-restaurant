@@ -3,6 +3,7 @@
 import { useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { useRestaurantStore } from '@/store/restaurant-store'
+import { useReportedStore } from '@/store/reported-store'
 import { useFilteredRestaurants } from '@/hooks/use-filtered-restaurants'
 import { REGIONS, DEFAULT_REGION } from '@/lib/regions'
 import FilterPanel from '@/components/FilterPanel'
@@ -31,12 +32,14 @@ export default function HomePage() {
   const setSelectedRestaurant = useRestaurantStore((s) => s.setSelectedRestaurant)
   const loadRestaurants = useRestaurantStore((s) => s.loadRestaurants)
   const checkAvailableRegions = useRestaurantStore((s) => s.checkAvailableRegions)
+  const loadSharedReported = useReportedStore((s) => s.loadSharedReported)
 
   const filteredRestaurants = useFilteredRestaurants()
 
   useEffect(() => {
     checkAvailableRegions()
-  }, [checkAvailableRegions])
+    loadSharedReported()
+  }, [checkAvailableRegions, loadSharedReported])
 
   useEffect(() => {
     loadRestaurants(region)

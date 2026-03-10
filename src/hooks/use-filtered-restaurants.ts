@@ -17,7 +17,8 @@ export function useFilteredRestaurants() {
   const recentOnly = useRestaurantStore((s) => s.recentOnly)
   const hideReported = useRestaurantStore((s) => s.hideReported)
   const favoriteIds = useFavoritesStore((s) => s.favoriteIds)
-  const reportedIds = useReportedStore((s) => s.reportedIds)
+  const localReportedIds = useReportedStore((s) => s.localReportedIds)
+  const sharedReportedIds = useReportedStore((s) => s.sharedReportedIds)
 
   return useMemo(() => {
     let data = allRestaurants
@@ -61,8 +62,14 @@ export function useFilteredRestaurants() {
       }
     }
 
-    if (hideReported && reportedIds.length > 0) {
-      data = data.filter((r) => !reportedIds.includes(r.id))
+    // 공유 신고 목록은 항상 숨김
+    if (sharedReportedIds.length > 0) {
+      data = data.filter((r) => !sharedReportedIds.includes(r.id))
+    }
+
+    // 로컬 신고 목록은 토글에 따라 숨김
+    if (hideReported && localReportedIds.length > 0) {
+      data = data.filter((r) => !localReportedIds.includes(r.id))
     }
 
     // 반경 필터 + 거리순 정렬
@@ -81,5 +88,5 @@ export function useFilteredRestaurants() {
     }
 
     return data
-  }, [allRestaurants, sourceFilter, foodTypeFilter, searchQuery, userLocation, radiusFilter, showFavoritesOnly, recentOnly, hideReported, favoriteIds, reportedIds])
+  }, [allRestaurants, sourceFilter, foodTypeFilter, searchQuery, userLocation, radiusFilter, showFavoritesOnly, recentOnly, hideReported, favoriteIds, localReportedIds, sharedReportedIds])
 }

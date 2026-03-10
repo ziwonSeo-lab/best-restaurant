@@ -44,7 +44,7 @@ export default function RestaurantCard({
               ⚠️ 네이버지도 연동이 안 되는 식당입니다 (폐업·상호변경 등)
             </p>
             <button
-              onClick={() => toggleReport(restaurant.id)}
+              onClick={() => toggleReport(restaurant.id, restaurant.name)}
               className="text-xs text-red-500 underline flex-shrink-0 ml-2"
             >
               신고 취소
@@ -225,7 +225,7 @@ export default function RestaurantCard({
           )}
           {!isReported && (
             <button
-              onClick={() => toggleReport(restaurant.id)}
+              onClick={() => toggleReport(restaurant.id, restaurant.name)}
               className="
                 flex items-center justify-center gap-1.5
                 px-3 py-2.5 rounded-lg

@@ -20,7 +20,7 @@ export default function FilterPanel() {
   const toggleRecentOnly = useRestaurantStore((s) => s.toggleRecentOnly)
   const hideReported = useRestaurantStore((s) => s.hideReported)
   const toggleHideReported = useRestaurantStore((s) => s.toggleHideReported)
-  const reportedIds = useReportedStore((s) => s.reportedIds)
+  const localReportedIds = useReportedStore((s) => s.localReportedIds)
 
   const [showFoodTypes, setShowFoodTypes] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -187,7 +187,7 @@ export default function FilterPanel() {
             />
           </>
         )}
-        {reportedIds.length > 0 && (
+        {localReportedIds.length > 0 && (
           <button
             onClick={toggleHideReported}
             title={hideReported ? '신고 식당 표시' : '신고 식당 숨기기'}
@@ -201,7 +201,7 @@ export default function FilterPanel() {
               }
             `}
           >
-            {hideReported ? `연동안됨 숨김 (${reportedIds.length})` : `연동안됨 ${reportedIds.length}`}
+            {hideReported ? `연동안됨 숨김 (${localReportedIds.length})` : `연동안됨 ${localReportedIds.length}`}
           </button>
         )}
         {foodTypes.length > 0 && (
