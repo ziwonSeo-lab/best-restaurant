@@ -127,12 +127,7 @@ export default function RestaurantCard({
           {restaurant.phone && (
             <div className="flex items-center gap-2">
               <span className="text-gray-400 flex-shrink-0">📞</span>
-              <a
-                href={`tel:${restaurant.phone}`}
-                className="text-sm text-blue-600 hover:underline"
-              >
-                {restaurant.phone}
-              </a>
+              <span className="text-sm text-gray-600">{restaurant.phone}</span>
             </div>
           )}
 
@@ -213,22 +208,6 @@ export default function RestaurantCard({
             </svg>
             네이버지도
           </a>
-          {restaurant.phone && (
-            <a
-              href={`tel:${restaurant.phone}`}
-              className="
-                flex items-center justify-center gap-1.5
-                px-4 py-2.5 rounded-lg
-                bg-blue-500 text-white text-sm font-medium
-                hover:bg-blue-600 active:bg-blue-700 transition-colors
-              "
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-              </svg>
-              전화
-            </a>
-          )}
           {isBibGourmand && restaurant.michelinUrl && (
             <a
               href={restaurant.michelinUrl}
@@ -248,16 +227,13 @@ export default function RestaurantCard({
             <button
               onClick={() => toggleReport(restaurant.id)}
               className="
-                flex items-center justify-center gap-1
+                flex items-center justify-center gap-1.5
                 px-3 py-2.5 rounded-lg
                 bg-gray-100 text-gray-500 text-sm font-medium
                 hover:bg-red-50 hover:text-red-500 active:bg-red-100 transition-colors
               "
-              title="폐업/정보오류 신고"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              🚫 폐업신고
             </button>
           )}
         </div>
