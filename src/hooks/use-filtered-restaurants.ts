@@ -1,8 +1,10 @@
 import { useMemo } from 'react'
 import { useRestaurantStore } from '@/store/restaurant-store'
 import { useFavoritesStore } from '@/store/favorites-store'
+import { useReportedStore } from '@/store/reported-store'
 import { haversineDistance } from '@/lib/geo-utils'
 import { isOlderThanYears } from '@/lib/date-utils'
+import { isChosungQuery, matchChosung } from '@/lib/korean-utils'
 
 export function useFilteredRestaurants() {
   const allRestaurants = useRestaurantStore((s) => s.allRestaurants)
@@ -13,7 +15,9 @@ export function useFilteredRestaurants() {
   const radiusFilter = useRestaurantStore((s) => s.radiusFilter)
   const showFavoritesOnly = useRestaurantStore((s) => s.showFavoritesOnly)
   const recentOnly = useRestaurantStore((s) => s.recentOnly)
+  const hideReported = useRestaurantStore((s) => s.hideReported)
   const favoriteIds = useFavoritesStore((s) => s.favoriteIds)
+  const reportedIds = useReportedStore((s) => s.reportedIds)
 
   return useMemo(() => {
     let data = allRestaurants
@@ -40,13 +44,25 @@ export function useFilteredRestaurants() {
     }
 
     if (searchQuery) {
-      const lower = searchQuery.toLowerCase()
-      data = data.filter(
-        (r) =>
-          r.name.toLowerCase().includes(lower) ||
-          r.address.toLowerCase().includes(lower) ||
-          r.mainFood.toLowerCase().includes(lower)
-      )
+      if (isChosungQuery(searchQuery)) {
+        data = data.filter(
+          (r) =>
+            matchChosung(r.name, searchQuery) ||
+            matchChosung(r.mainFood, searchQuery)
+        )
+      } else {
+        const lower = searchQuery.toLowerCase()
+        data = data.filter(
+          (r) =>
+            r.name.toLowerCase().includes(lower) ||
+            r.address.toLowerCase().includes(lower) ||
+            r.mainFood.toLowerCase().includes(lower)
+        )
+      }
+    }
+
+    if (hideReported && reportedIds.length > 0) {
+      data = data.filter((r) => !reportedIds.includes(r.id))
     }
 
     // 반경 필터 + 거리순 정렬
@@ -65,5 +81,5 @@ export function useFilteredRestaurants() {
     }
 
     return data
-  }, [allRestaurants, sourceFilter, foodTypeFilter, searchQuery, userLocation, radiusFilter, showFavoritesOnly, recentOnly, favoriteIds])
+  }, [allRestaurants, sourceFilter, foodTypeFilter, searchQuery, userLocation, radiusFilter, showFavoritesOnly, recentOnly, hideReported, favoriteIds, reportedIds])
 }

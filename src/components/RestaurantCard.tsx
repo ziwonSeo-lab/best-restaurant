@@ -2,6 +2,7 @@
 
 import type { Restaurant } from '@/lib/types'
 import { useFavoritesStore } from '@/store/favorites-store'
+import { useReportedStore } from '@/store/reported-store'
 import { formatDesignatedDate, isOlderThanYears } from '@/lib/date-utils'
 
 interface RestaurantCardProps {
@@ -25,15 +26,32 @@ export default function RestaurantCard({
   const isBibGourmand = restaurant.source === 'bibgourmand'
   const isFavorite = useFavoritesStore((s) => s.isFavorite(restaurant.id))
   const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite)
+  const isReported = useReportedStore((s) => s.isReported(restaurant.id))
+  const toggleReport = useReportedStore((s) => s.toggleReport)
 
   return (
-    <div className="bg-white rounded-t-2xl shadow-lg border-t border-gray-100 animate-slide-up">
+    <div className={`rounded-t-2xl shadow-lg border-t border-gray-100 animate-slide-up ${isReported ? 'bg-gray-50' : 'bg-white'}`}>
       {/* 핸들 바 */}
       <div className="flex justify-center pt-3 pb-2">
         <div className="w-10 h-1 bg-gray-300 rounded-full" />
       </div>
 
       <div className="px-4 pb-4 pb-safe">
+        {/* 신고 배너 */}
+        {isReported && (
+          <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3 flex items-center justify-between">
+            <p className="text-xs text-red-600">
+              ⚠️ 폐업/정보오류 신고된 식당입니다
+            </p>
+            <button
+              onClick={() => toggleReport(restaurant.id)}
+              className="text-xs text-red-500 underline flex-shrink-0 ml-2"
+            >
+              신고 취소
+            </button>
+          </div>
+        )}
+
         {/* 헤더 */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex-1 min-w-0">
@@ -225,6 +243,22 @@ export default function RestaurantCard({
             >
               🌸 미쉐린
             </a>
+          )}
+          {!isReported && (
+            <button
+              onClick={() => toggleReport(restaurant.id)}
+              className="
+                flex items-center justify-center gap-1
+                px-3 py-2.5 rounded-lg
+                bg-gray-100 text-gray-500 text-sm font-medium
+                hover:bg-red-50 hover:text-red-500 active:bg-red-100 transition-colors
+              "
+              title="폐업/정보오류 신고"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
           )}
         </div>
       </div>

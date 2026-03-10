@@ -1,8 +1,9 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useRestaurantStore } from '@/store/restaurant-store'
 import { useFavoritesStore } from '@/store/favorites-store'
+import { useReportedStore } from '@/store/reported-store'
 
 export default function FilterPanel() {
   const allRestaurants = useRestaurantStore((s) => s.allRestaurants)
@@ -11,12 +12,32 @@ export default function FilterPanel() {
   const setFoodType = useRestaurantStore((s) => s.setFoodTypeFilter)
   const setSource = useRestaurantStore((s) => s.setSourceFilter)
   const favoriteIds = useFavoritesStore((s) => s.favoriteIds)
+  const exportFavorites = useFavoritesStore((s) => s.exportFavorites)
+  const importFavorites = useFavoritesStore((s) => s.importFavorites)
   const showFavoritesOnly = useRestaurantStore((s) => s.showFavoritesOnly)
   const setShowFavoritesOnly = useRestaurantStore((s) => s.setShowFavoritesOnly)
   const recentOnly = useRestaurantStore((s) => s.recentOnly)
   const toggleRecentOnly = useRestaurantStore((s) => s.toggleRecentOnly)
+  const hideReported = useRestaurantStore((s) => s.hideReported)
+  const toggleHideReported = useRestaurantStore((s) => s.toggleHideReported)
+  const reportedIds = useReportedStore((s) => s.reportedIds)
 
   const [showFoodTypes, setShowFoodTypes] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const ids = JSON.parse(ev.target?.result as string)
+        if (Array.isArray(ids)) importFavorites(ids)
+      } catch { /* invalid JSON */ }
+    }
+    reader.readAsText(file)
+    e.target.value = ''
+  }
 
   const sourceCounts = useMemo(() => {
     let model = 0
@@ -139,6 +160,50 @@ export default function FilterPanel() {
         >
           ⭐ 즐겨찾기 ({favoriteIds.length})
         </button>
+        {showFavoritesOnly && favoriteIds.length > 0 && (
+          <button
+            onClick={exportFavorites}
+            title="즐겨찾기 내보내기"
+            className="flex-shrink-0 px-2.5 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+          >
+            ↓
+          </button>
+        )}
+        {showFavoritesOnly && (
+          <>
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              title="즐겨찾기 가져오기"
+              className="flex-shrink-0 px-2.5 py-2 rounded-full text-sm font-medium transition-all duration-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
+            >
+              ↑
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleImport}
+              className="hidden"
+            />
+          </>
+        )}
+        {reportedIds.length > 0 && (
+          <button
+            onClick={toggleHideReported}
+            title={hideReported ? '신고 식당 표시' : '신고 식당 숨기기'}
+            className={`
+              flex-shrink-0 px-3 py-2 rounded-full text-sm font-medium
+              transition-all duration-200
+              ${
+                hideReported
+                  ? 'bg-red-500 text-white shadow-sm'
+                  : 'bg-red-50 text-red-600 hover:bg-red-100'
+              }
+            `}
+          >
+            {hideReported ? `신고 숨김 (${reportedIds.length})` : `신고 ${reportedIds.length}`}
+          </button>
+        )}
         {foodTypes.length > 0 && (
           <button
             onClick={() => {

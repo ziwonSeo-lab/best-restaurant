@@ -23,6 +23,9 @@ interface RestaurantState {
   // 최근 지정 필터 (모범식당 5년 이내)
   recentOnly: boolean
 
+  // 신고된 식당 숨기기
+  hideReported: boolean
+
   // 지도 뷰포트 영역
   mapBounds: { south: number; north: number; west: number; east: number } | null
 
@@ -39,6 +42,7 @@ interface RestaurantState {
   setSelectedRestaurant: (restaurant: Restaurant | null) => void
   setShowFavoritesOnly: (show: boolean) => void
   toggleRecentOnly: () => void
+  toggleHideReported: () => void
   loadRestaurants: (region: string) => Promise<void>
   checkAvailableRegions: () => Promise<void>
 
@@ -70,6 +74,7 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
   showFavoritesOnly: false,
 
   recentOnly: false,
+  hideReported: false,
 
   mapBounds: null,
 
@@ -99,6 +104,7 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
   setShowFavoritesOnly: (showFavoritesOnly) => set({ showFavoritesOnly }),
 
   toggleRecentOnly: () => set((state) => ({ recentOnly: !state.recentOnly })),
+  toggleHideReported: () => set((state) => ({ hideReported: !state.hideReported })),
 
   loadRestaurants: async (region) => {
     set({ isLoading: true, error: null })
