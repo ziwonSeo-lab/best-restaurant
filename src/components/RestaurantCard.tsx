@@ -41,7 +41,7 @@ export default function RestaurantCard({
         {isReported && (
           <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-3 flex items-center justify-between">
             <p className="text-xs text-red-600">
-              ⚠️ 폐업/정보오류 신고된 식당입니다
+              ⚠️ 네이버지도 연동이 안 되는 식당입니다 (폐업·상호변경 등)
             </p>
             <button
               onClick={() => toggleReport(restaurant.id)}
@@ -233,7 +233,7 @@ export default function RestaurantCard({
                 hover:bg-red-50 hover:text-red-500 active:bg-red-100 transition-colors
               "
             >
-              🚫 폐업신고
+              ⚠️ 연동안됨
             </button>
           )}
         </div>

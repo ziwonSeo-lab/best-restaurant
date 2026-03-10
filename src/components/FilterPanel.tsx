@@ -201,7 +201,7 @@ export default function FilterPanel() {
               }
             `}
           >
-            {hideReported ? `신고 숨김 (${reportedIds.length})` : `신고 ${reportedIds.length}`}
+            {hideReported ? `연동안됨 숨김 (${reportedIds.length})` : `연동안됨 ${reportedIds.length}`}
           </button>
         )}
         {foodTypes.length > 0 && (
