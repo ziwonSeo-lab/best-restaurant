@@ -147,7 +147,7 @@ export default function RestaurantCard({
               <p className="text-xs text-amber-700">
                 ⚠️ 지정일이 5년 이상 경과하여 상호 변경 가능성이 있습니다.{' '}
                 <a
-                  href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name)}`}
+                  href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name + ' ' + (restaurant.address || restaurant.jibunAddress))}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline font-medium"
@@ -189,7 +189,7 @@ export default function RestaurantCard({
         {/* 액션 버튼 */}
         <div className="flex gap-2 mt-4">
           <a
-            href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name)}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh`}
+            href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name + ' ' + (restaurant.address || restaurant.jibunAddress))}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh`}
             target="_blank"
             rel="noopener noreferrer"
             className="

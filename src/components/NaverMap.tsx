@@ -227,7 +227,7 @@ export default function LeafletMap({
           zIndexOffset: isSelected ? 1000 : isFav ? 500 : 0,
         })
 
-        const naverMapUrl = `https://map.naver.com/p/search/${encodeURIComponent(restaurant.name)}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh&lat=${restaurant.lat}&lng=${restaurant.lng}`
+        const naverMapUrl = `https://map.naver.com/p/search/${encodeURIComponent(restaurant.name + ' ' + (restaurant.address || restaurant.jibunAddress))}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh`
 
         const reviewHtml = restaurant.source === 'blueribbon' && restaurant.review
           ? `<div style="font-size: 12px; color: #555; margin-top: 6px; padding: 6px 8px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #3498db; font-style: italic;">"${restaurant.review}"</div>`
