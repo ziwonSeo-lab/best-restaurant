@@ -227,7 +227,12 @@ export default function LeafletMap({
           zIndexOffset: isSelected ? 1000 : isFav ? 500 : 0,
         })
 
-        const shortAddr = (restaurant.address || restaurant.jibunAddress || '').split(/\s+/)[1] || ''
+        const addr = restaurant.address || restaurant.jibunAddress || ''
+        const addrParts = addr.split(/\s+/)
+        const gu = addrParts.find((p: string) => /[구군]$/.test(p)) || addrParts[1] || ''
+        const parenMatch = addr.match(/\(([^)]*[동면읍리])/)
+        const dong = parenMatch?.[1] || (restaurant.jibunAddress || '').split(/\s+/).find((p: string) => /[동면읍리]$/.test(p)) || ''
+        const shortAddr = dong ? gu + ' ' + dong : gu
         const naverMapUrl = `https://map.naver.com/p/search/${encodeURIComponent(restaurant.name + ' ' + shortAddr)}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh`
 
         const reviewHtml = restaurant.source === 'blueribbon' && restaurant.review

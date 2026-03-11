@@ -8,8 +8,18 @@ import { formatDesignatedDate, isOlderThanYears } from '@/lib/date-utils'
 function getShortAddress(restaurant: Restaurant): string {
   const addr = restaurant.address || restaurant.jibunAddress || ''
   const parts = addr.split(/\s+/)
-  // "서울특별시 종로구 ..." → "종로구"
-  return parts[1] || parts[0] || ''
+  const gu = parts.find((p) => /[구군]$/.test(p)) || parts[1] || ''
+
+  // 1) 도로명 주소 괄호 안 동 추출
+  const parenMatch = addr.match(/\(([^)]*[동면읍리])/)
+  if (parenMatch) return gu + ' ' + parenMatch[1]
+
+  // 2) 지번 주소에서 동 추출
+  const jibun = restaurant.jibunAddress || ''
+  const dong = jibun.split(/\s+/).find((p) => /[동면읍리]$/.test(p))
+  if (dong) return gu + ' ' + dong
+
+  return gu
 }
 
 interface RestaurantCardProps {
