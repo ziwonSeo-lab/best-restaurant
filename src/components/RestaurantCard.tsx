@@ -5,6 +5,13 @@ import { useFavoritesStore } from '@/store/favorites-store'
 import { useReportedStore } from '@/store/reported-store'
 import { formatDesignatedDate, isOlderThanYears } from '@/lib/date-utils'
 
+function getShortAddress(restaurant: Restaurant): string {
+  const addr = restaurant.address || restaurant.jibunAddress || ''
+  const parts = addr.split(/\s+/)
+  // "서울특별시 종로구 ..." → "종로구"
+  return parts[1] || parts[0] || ''
+}
+
 interface RestaurantCardProps {
   restaurant: Restaurant
   onClose: () => void
@@ -147,7 +154,7 @@ export default function RestaurantCard({
               <p className="text-xs text-amber-700">
                 ⚠️ 지정일이 5년 이상 경과하여 상호 변경 가능성이 있습니다.{' '}
                 <a
-                  href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name + ' ' + (restaurant.address || restaurant.jibunAddress))}`}
+                  href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name + ' ' + getShortAddress(restaurant))}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline font-medium"
@@ -189,7 +196,7 @@ export default function RestaurantCard({
         {/* 액션 버튼 */}
         <div className="flex gap-2 mt-4">
           <a
-            href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name + ' ' + (restaurant.address || restaurant.jibunAddress))}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh`}
+            href={`https://map.naver.com/p/search/${encodeURIComponent(restaurant.name + ' ' + getShortAddress(restaurant))}?c=${restaurant.lng},${restaurant.lat},17,0,0,0,dh`}
             target="_blank"
             rel="noopener noreferrer"
             className="
