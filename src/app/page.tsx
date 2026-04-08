@@ -12,7 +12,7 @@ import RestaurantCard from '@/components/RestaurantCard'
 import RandomButton from '@/components/RandomButton'
 import MapOverlayCounts from '@/components/MapOverlayCounts'
 
-const GoogleMap = dynamic(() => import('@/components/GoogleMapView'), {
+const LeafletMap = dynamic(() => import('@/components/NaverMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-stone-50">
@@ -92,7 +92,7 @@ export default function HomePage() {
           </div>
         ) : (
           <>
-            <GoogleMap
+            <LeafletMap
               restaurants={filteredRestaurants}
               center={mapCenter}
               onMarkerClick={setSelectedRestaurant}
