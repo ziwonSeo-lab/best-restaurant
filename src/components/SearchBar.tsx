@@ -19,7 +19,6 @@ export default function SearchBar() {
   const removeSearch = useHistoryStore((s) => s.removeSearch)
   const clearAll = useHistoryStore((s) => s.clearAll)
 
-  // Sync local state when store resets (e.g., region change)
   useEffect(() => {
     setLocalQuery(searchQuery)
     if (searchQuery) setIsExpanded(true)
@@ -65,7 +64,6 @@ export default function SearchBar() {
     setTimeout(() => inputRef.current?.focus(), 50)
   }, [])
 
-  // 외부 클릭 시 접기
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -77,52 +75,30 @@ export default function SearchBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [localQuery])
 
-  // 접힌 상태: 검색 아이콘 버튼
   if (!isExpanded) {
     return (
       <button
         onClick={handleExpand}
         className="
-          flex items-center gap-2 w-full px-3 py-2
-          bg-gray-100 rounded-lg
-          text-sm text-gray-400
-          hover:bg-gray-200 transition-colors
+          flex items-center gap-2 w-full px-3 py-1.5
+          bg-stone-100 rounded-lg
+          text-sm text-stone-400
+          hover:bg-stone-200 transition-colors cursor-pointer
         "
       >
-        <svg
-          className="h-4 w-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
+        <svg className="h-4 w-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         검색
       </button>
     )
   }
 
-  // 펼쳐진 상태: 검색 입력
   return (
     <div className="relative" ref={containerRef}>
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <svg
-          className="h-4 w-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
+        <svg className="h-4 w-4 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
       </div>
       <input
@@ -131,45 +107,36 @@ export default function SearchBar() {
         value={localQuery}
         onChange={(e) => handleChange(e.target.value)}
         onFocus={() => setShowHistory(true)}
-        placeholder="검색"
+        placeholder="식당 이름, 업종, 주소 검색"
         className="
-          w-full pl-10 pr-10 py-2
-          bg-white border border-gray-200 rounded-lg
-          text-sm text-gray-700 placeholder-gray-400
-          shadow-sm
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+          w-full pl-10 pr-10 py-1.5
+          bg-white border border-stone-200 rounded-lg
+          text-sm text-stone-700 placeholder-stone-400
+          focus:outline-none focus:ring-1 focus:ring-stone-400 focus:border-stone-400
         "
       />
       <button
         onClick={handleClear}
-        className="absolute inset-y-0 right-0 pr-3 flex items-center"
+        className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer"
       >
-        <svg
-          className="h-4 w-4 text-gray-400 hover:text-gray-600"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
+        <svg className="h-4 w-4 text-stone-400 hover:text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
 
       {/* 검색 히스토리 드롭다운 */}
       {showHistory && searches.length > 0 && !localQuery && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-[1002] max-h-64 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-stone-200 rounded-lg shadow-lg z-[1002] max-h-64 overflow-y-auto">
           {searches.map((query) => (
             <div
               key={query}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+              className="flex items-center gap-2 px-3 py-2 hover:bg-stone-50 cursor-pointer"
             >
-              <span className="text-gray-400 text-xs flex-shrink-0">🕐</span>
+              <svg className="w-3.5 h-3.5 text-stone-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <button
-                className="flex-1 text-left text-sm text-gray-700 truncate"
+                className="flex-1 text-left text-sm text-stone-600 truncate cursor-pointer"
                 onClick={() => handleSelectHistory(query)}
               >
                 {query}
@@ -179,7 +146,7 @@ export default function SearchBar() {
                   e.stopPropagation()
                   removeSearch(query)
                 }}
-                className="flex-shrink-0 p-0.5 text-gray-300 hover:text-gray-500"
+                className="flex-shrink-0 p-0.5 text-stone-300 hover:text-stone-500 cursor-pointer"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -187,13 +154,13 @@ export default function SearchBar() {
               </button>
             </div>
           ))}
-          <div className="border-t border-gray-100">
+          <div className="border-t border-stone-100">
             <button
               onClick={() => {
                 clearAll()
                 setShowHistory(false)
               }}
-              className="w-full px-3 py-2 text-xs text-gray-400 hover:text-gray-600 hover:bg-gray-50 text-center"
+              className="w-full px-3 py-2 text-xs text-stone-400 hover:text-stone-600 hover:bg-stone-50 text-center cursor-pointer"
             >
               전체 삭제
             </button>

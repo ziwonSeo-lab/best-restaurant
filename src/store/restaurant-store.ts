@@ -110,10 +110,12 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
     set({ isLoading: true, error: null })
 
     try {
-      const [modelRes, blueribbonRes, bibgourmandRes] = await Promise.allSettled([
+      const [modelRes, blueribbonRes, bibgourmandRes, yeskidszoneRes, goodpriceRes] = await Promise.allSettled([
         fetch(`${BASE_PATH}/data/${region}.json`),
         fetch(`${BASE_PATH}/data/blueribbon-${region}.json`),
         fetch(`${BASE_PATH}/data/bibgourmand-${region}.json`),
+        fetch(`${BASE_PATH}/data/yeskidszone-${region}.json`),
+        fetch(`${BASE_PATH}/data/goodprice-${region}.json`),
       ])
 
       const restaurants: Restaurant[] = []
@@ -139,6 +141,20 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
         )
       }
 
+      if (yeskidszoneRes.status === 'fulfilled' && yeskidszoneRes.value.ok) {
+        const data: Restaurant[] = await yeskidszoneRes.value.json()
+        restaurants.push(
+          ...data.map((r) => ({ ...r, source: (r.source || 'yeskidszone') as RestaurantSource }))
+        )
+      }
+
+      if (goodpriceRes.status === 'fulfilled' && goodpriceRes.value.ok) {
+        const data: Restaurant[] = await goodpriceRes.value.json()
+        restaurants.push(
+          ...data.map((r) => ({ ...r, source: (r.source || 'goodprice') as RestaurantSource }))
+        )
+      }
+
       if (restaurants.length === 0) {
         set({
           error: `${REGIONS[region]?.name || region} 데이터가 아직 준비되지 않았습니다.`,
@@ -160,21 +176,25 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
 
   checkAvailableRegions: async () => {
     const keys = Object.keys(REGIONS)
-    const results = await Promise.all(
-      keys.map(async (key) => {
-        try {
-          const [modelRes, blueribbonRes, bibgourmandRes] = await Promise.all([
-            fetch(`${BASE_PATH}/data/${key}.json`, { method: 'HEAD' }).catch(() => null),
-            fetch(`${BASE_PATH}/data/blueribbon-${key}.json`, { method: 'HEAD' }).catch(() => null),
-            fetch(`${BASE_PATH}/data/bibgourmand-${key}.json`, { method: 'HEAD' }).catch(() => null),
-          ])
-          return (modelRes?.ok || blueribbonRes?.ok || bibgourmandRes?.ok) ? key : null
-        } catch {
-          return null
+    const available: string[] = []
+
+    // 순차적으로 체크하여 dev 서버 과부하 방지
+    for (const key of keys) {
+      try {
+        const res = await fetch(`${BASE_PATH}/data/${key}.json`, { method: 'HEAD' }).catch(() => null)
+        if (res?.ok) {
+          available.push(key)
+          continue
         }
-      })
-    )
-    const available = results.filter((k): k is string => k !== null)
+        const br = await fetch(`${BASE_PATH}/data/blueribbon-${key}.json`, { method: 'HEAD' }).catch(() => null)
+        if (br?.ok) {
+          available.push(key)
+        }
+      } catch {
+        // skip
+      }
+    }
+
     set({ availableRegions: available.length > 0 ? available : [DEFAULT_REGION] })
   },
 

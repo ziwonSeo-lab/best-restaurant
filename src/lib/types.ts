@@ -1,4 +1,4 @@
-export type RestaurantSource = 'model' | 'blueribbon' | 'bibgourmand'
+export type RestaurantSource = 'model' | 'blueribbon' | 'bibgourmand' | 'yeskidszone' | 'goodprice'
 export type RibbonType = 'RIBBON_ONE' | 'RIBBON_TWO' | 'RIBBON_THREE'
 
 export interface Restaurant {
@@ -19,6 +19,9 @@ export interface Restaurant {
   priceCategoryLabel?: string
   michelinDesc?: string
   michelinUrl?: string
+  kidsZoneInfo?: string
+  strollerFriendly?: boolean
+  goodpriceMenus?: { name: string; price: string }[]
 }
 
 export interface RawRestaurantCSV {
