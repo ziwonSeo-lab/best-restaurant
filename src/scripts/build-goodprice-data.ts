@@ -46,10 +46,11 @@ const REGION_NAMES: Record<string, string> = {
 
 // 붙어있는 한국 주소를 공백으로 분리
 // "서울특별시종로구대학로5길5(연건동)" → "서울특별시 종로구 대학로5길 5"
+// "서울특별시중구퇴계로3361층101호(광희동)" → "서울특별시 중구 퇴계로 336"
 function splitKoreanAddress(addr: string): string {
   if (addr.includes(' ')) return addr
 
-  const base = addr.replace(/\(.*\)$/, '').trim()
+  const base = addr.replace(/\(.*?\)/g, '').trim()
 
   // 시도 분리
   const sidoMatch = base.match(
@@ -63,25 +64,55 @@ function splitKoreanAddress(addr: string): string {
   const sigunguMatch = afterSido.match(
     /^(.*?[시군].*?구|.*?[시군구])(.*)/
   )
-  if (!sigunguMatch) return `${sido} ${afterSido}`
 
-  let [, sigungu, afterSigungu] = sigunguMatch
+  let sigungu = ''
+  let afterSigungu = afterSido
 
-  // 중첩 시+구인 경우 내부에도 공백 추가
-  sigungu = sigungu.replace(/([시])(?=[가-힣])/, '$1 ')
-
-  // 도로명 + 건물번호 분리
-  // 도로명: 한글 + (숫자+번길|숫자+길|대로|로|길) → 마지막 대로/로/길로 끝나는 부분
-  // 예: 대학로5길, 테헤란로108길, 해운대로570번길, 동숭길, 팔달로
-  const roadMatch = afterSigungu.match(
-    /^(.*(?:대로|번길|길|로))(\d+.*)$/
-  )
-  if (roadMatch) {
-    const [, road, num] = roadMatch
-    return `${sido} ${sigungu} ${road} ${num}`
+  if (sigunguMatch) {
+    sigungu = sigunguMatch[1].replace(/([시])(?=[가-힣])/, '$1 ')
+    afterSigungu = sigunguMatch[2]
   }
 
-  return `${sido} ${sigungu} ${afterSigungu}`
+  const prefix = sigungu ? `${sido} ${sigungu}` : sido
+
+  // 도로명 추출 - 복합 도로명 우선 (대로N길 > 로N바길 > 로N번길 > 로N길 > 대로 > 번길 > 한글N길 > 로 > 길)
+  const roadPatterns: RegExp[] = [
+    /^(.*?(?:대로|로)\d+[가-힣]?길)(.*)/,  // 세종대로23길, 와우산로29바길
+    /^(.*?(?:대로|로)\d+번길)(.*)/,          // 해운대로570번길
+    /^(.*?(?:대로|로)\d+길)(.*)/,            // 테헤란로108길
+    /^(.*?(?:대로|번길))(.*)/,               // 강남대로, 번길
+    /^(.*?[가-힣]\d+[가-힣]?길)(.*)/,        // 동숭3길
+    /^(.*?(?:로|길))(.*)/,                   // 퇴계로, 명륜길
+  ]
+
+  let road = ''
+  let afterRoad = ''
+  for (const pat of roadPatterns) {
+    const m = afterSigungu.match(pat)
+    if (m) {
+      road = m[1]
+      afterRoad = m[2]
+      break
+    }
+  }
+
+  if (!road) return `${prefix} ${afterSigungu}`
+  if (!afterRoad) return `${prefix} ${road}`
+
+  // 건물번호와 상세주소(층/호/지하) 분리
+  // "3361층101호" → 건물번호 336 + 1층(제거)
+  const floorSplit = afterRoad.match(/^(\d+(?:-\d+)?)(\d{1,2})(층.*)/)
+  if (floorSplit) return `${prefix} ${road} ${floorSplit[1]}`
+
+  // "50지하1층", "81지층136호"
+  const underSplit = afterRoad.match(/^(\d+(?:-\d+)?)(지하|지층|동|B)/)
+  if (underSplit) return `${prefix} ${road} ${underSplit[1]}`
+
+  // 일반 건물번호
+  const numMatch = afterRoad.match(/^(\d+(?:-\d+)?)/)
+  if (numMatch) return `${prefix} ${road} ${numMatch[1]}`
+
+  return `${prefix} ${road}`
 }
 
 // 음식 관련 업종만 필터 (비요식업, 미용, 세탁, 숙박 등 제외)
