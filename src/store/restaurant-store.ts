@@ -179,15 +179,18 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
     const available: string[] = []
 
     // 순차적으로 체크하여 dev 서버 과부하 방지
+    const dataFiles = ['', 'blueribbon-', 'goodprice-']
     for (const key of keys) {
       try {
-        const res = await fetch(`${BASE_PATH}/data/${key}.json`, { method: 'HEAD' }).catch(() => null)
-        if (res?.ok) {
-          available.push(key)
-          continue
+        let found = false
+        for (const prefix of dataFiles) {
+          const res = await fetch(`${BASE_PATH}/data/${prefix}${key}.json`, { method: 'HEAD' }).catch(() => null)
+          if (res?.ok) {
+            found = true
+            break
+          }
         }
-        const br = await fetch(`${BASE_PATH}/data/blueribbon-${key}.json`, { method: 'HEAD' }).catch(() => null)
-        if (br?.ok) {
+        if (found) {
           available.push(key)
         }
       } catch {
