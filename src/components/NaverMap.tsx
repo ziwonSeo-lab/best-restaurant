@@ -81,7 +81,10 @@ function buildPopupContent(restaurant: Restaurant): string {
       : ''
 
   return `
-    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5; min-width: 200px; max-width: 260px; padding: 12px;">
+    <div style="position: relative; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.5; min-width: 200px; max-width: 260px; padding: 12px; padding-right: 32px;">
+      <button type="button" data-close-infowindow="true" aria-label="닫기"
+        style="position:absolute; top:6px; right:6px; width:24px; height:24px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; border-radius:50%; color:#6b7280; font-size:18px; line-height:1; padding:0;"
+        onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='transparent'">×</button>
       <div style="font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px;">
         ${restaurant.name}
       </div>
@@ -224,6 +227,20 @@ export default function NaverMapComponent({
     }
     const boundsListener = window.naver.maps.Event.addListener(map, 'bounds_changed', updateBounds)
 
+    // 맵 클릭 시 인포윈도우 닫기
+    const mapClickListener = window.naver.maps.Event.addListener(map, 'click', () => {
+      infoWindowRef.current?.close()
+    })
+
+    // 인포윈도우 내 X 버튼 닫기 (이벤트 위임)
+    const handleDocumentClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null
+      if (target?.closest('[data-close-infowindow]')) {
+        infoWindowRef.current?.close()
+      }
+    }
+    document.addEventListener('click', handleDocumentClick)
+
     const handleVisibility = () => {
       if (document.visibilityState === 'visible' && mapRef.current) {
         setTimeout(() => mapRef.current?.refresh(true), 100)
@@ -249,6 +266,8 @@ export default function NaverMapComponent({
       window.removeEventListener('orientationchange', handleResize)
       window.removeEventListener('pageshow', handlePageShow)
       window.naver.maps.Event.removeListener(boundsListener)
+      window.naver.maps.Event.removeListener(mapClickListener)
+      document.removeEventListener('click', handleDocumentClick)
       clusteringRef.current?.setMap(null)
       map.destroy()
       mapRef.current = null
