@@ -1,4 +1,3 @@
-import L from 'leaflet'
 import type { Restaurant } from './types'
 
 interface MarkerStyle {
@@ -18,7 +17,17 @@ function getStyle(source: string): MarkerStyle {
   }
 }
 
-export function createMarkerIcon(restaurant: Restaurant, isFavorite: boolean, isSelected = false): L.DivIcon {
+export interface NaverIconSpec {
+  content: string
+  size: { width: number; height: number }
+  anchor: { x: number; y: number }
+}
+
+export function createMarkerIcon(
+  restaurant: Restaurant,
+  isFavorite: boolean,
+  isSelected = false,
+): NaverIconSpec {
   const style = getStyle(restaurant.source)
   const bg = isSelected ? '#ec4899' : style.bg
   const border = isSelected ? '#db2777' : style.border
@@ -36,17 +45,17 @@ export function createMarkerIcon(restaurant: Restaurant, isFavorite: boolean, is
       ">♥</div>`
     : ''
 
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `<div style="
+  const content = `<div style="
       position: relative;
       width: ${size}px; height: ${size}px;
       background: ${bg};
       border: 2.5px solid ${border};
       border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
+      transform: translate(-50%, -100%) rotate(-45deg);
       box-shadow: 0 2px 6px rgba(0,0,0,0.4);
       display: flex; align-items: center; justify-content: center;
+      margin-left: ${size / 2}px;
+      margin-top: ${size}px;
     ">
       <span style="
         transform: rotate(45deg);
@@ -54,9 +63,11 @@ export function createMarkerIcon(restaurant: Restaurant, isFavorite: boolean, is
         line-height: 1;
       ">${icon}</span>
       ${heartBadge}
-    </div>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size],
-    popupAnchor: [0, -size],
-  })
+    </div>`
+
+  return {
+    content,
+    size: { width: size, height: size },
+    anchor: { x: size / 2, y: size },
+  }
 }
