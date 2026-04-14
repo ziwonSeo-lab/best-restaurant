@@ -37,6 +37,9 @@ function getSourceBadgeHtml(restaurant: Restaurant): string {
   if (restaurant.source === 'bibgourmand') {
     return `<span style="font-size: 11px; padding: 1px 6px; background: #fdf2f8; color: #be185d; border-radius: 8px;">빕 구르망 🌸</span>`
   }
+  if (restaurant.source === 'goodprice') {
+    return `<span style="font-size: 11px; padding: 1px 6px; background: #fef3c7; color: #b45309; border-radius: 8px;">착한가격 💰</span>`
+  }
   return `<span style="font-size: 11px; padding: 1px 6px; background: #eafaf1; color: #27ae60; border-radius: 8px;">모범식당</span>`
 }
 

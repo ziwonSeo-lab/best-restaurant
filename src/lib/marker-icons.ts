@@ -12,6 +12,8 @@ function getStyle(source: string): MarkerStyle {
       return { bg: '#2563eb', border: '#1d4ed8', icon: '🎗️' }
     case 'bibgourmand':
       return { bg: '#db2777', border: '#be185d', icon: '🌸' }
+    case 'goodprice':
+      return { bg: '#f59e0b', border: '#d97706', icon: '💰' }
     default:
       return { bg: '#16a34a', border: '#15803d', icon: '🏅' }
   }
