@@ -9,6 +9,7 @@ import { useFavoritesStore } from '@/store/favorites-store'
 interface NaverMapProps {
   restaurants: Restaurant[]
   center: { lat: number; lng: number }
+  zoom?: number
   onMarkerClick?: (restaurant: Restaurant) => void
 }
 
@@ -143,6 +144,7 @@ function buildClusterIcons(): naver.maps.HtmlIcon[] {
 export default function NaverMapComponent({
   restaurants,
   center,
+  zoom = 12,
   onMarkerClick,
 }: NaverMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
@@ -187,7 +189,7 @@ export default function NaverMapComponent({
 
     const map = new window.naver.maps.Map(mapContainerRef.current, {
       center: new window.naver.maps.LatLng(center.lat, center.lng),
-      zoom: 12,
+      zoom,
       minZoom: 7,
       maxZoom: 19,
       zoomControl: true,
@@ -281,8 +283,8 @@ export default function NaverMapComponent({
   useEffect(() => {
     if (!mapRef.current) return
     mapRef.current.panTo(new window.naver.maps.LatLng(center.lat, center.lng))
-    mapRef.current.setZoom(12, true)
-  }, [center])
+    mapRef.current.setZoom(zoom, true)
+  }, [center, zoom])
 
   // 마커 업데이트
   useEffect(() => {

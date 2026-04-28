@@ -47,6 +47,7 @@ export default function HomePage() {
   }, [region, loadRestaurants, checkAvailableRegions])
 
   const mapCenter = REGIONS[region]?.center || REGIONS[DEFAULT_REGION].center
+  const mapZoom = REGIONS[region]?.zoom ?? 12
 
   return (
     <div className="h-dvh flex flex-col bg-stone-50">
@@ -95,6 +96,7 @@ export default function HomePage() {
             <LeafletMap
               restaurants={filteredRestaurants}
               center={mapCenter}
+              zoom={mapZoom}
               onMarkerClick={setSelectedRestaurant}
             />
             <MapOverlayCounts

@@ -1,6 +1,12 @@
 import type { RegionInfo } from './types'
 
 export const REGIONS: Record<string, RegionInfo> = {
+  all: {
+    code: 'ALL',
+    name: '전국',
+    center: { lat: 36.5, lng: 127.8 },
+    zoom: 7,
+  },
   seoul: {
     code: '6110000_ALL',
     name: '서울특별시',
@@ -89,4 +95,4 @@ export const REGIONS: Record<string, RegionInfo> = {
 }
 
 export const REGION_KEYS = Object.keys(REGIONS)
-export const DEFAULT_REGION = 'seoul'
+export const DEFAULT_REGION = 'all'

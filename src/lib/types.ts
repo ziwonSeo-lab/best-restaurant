@@ -1,6 +1,19 @@
 export type RestaurantSource = 'model' | 'blueribbon' | 'bibgourmand' | 'yeskidszone' | 'goodprice'
 export type RibbonType = 'RIBBON_ONE' | 'RIBBON_TWO' | 'RIBBON_THREE'
 
+// 0=일, 1=월, 2=화, 3=수, 4=목, 5=금, 6=토 (JS Date.getDay() 기준)
+export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6
+
+export interface DayHours {
+  open: string  // "HH:mm" 형식
+  close: string // "HH:mm" 형식
+}
+
+export interface BusinessHours {
+  periods: Partial<Record<DayOfWeek, DayHours>> // 영업하는 요일만 포함, 없는 요일=휴무
+  fetchedAt: string // ISO date (예: "2026-04-22")
+}
+
 export interface Restaurant {
   id: string
   name: string
@@ -22,6 +35,7 @@ export interface Restaurant {
   kidsZoneInfo?: string
   strollerFriendly?: boolean
   goodpriceMenus?: { name: string; price: string }[]
+  businessHours?: BusinessHours
 }
 
 export interface RawRestaurantCSV {
@@ -53,4 +67,5 @@ export interface RegionInfo {
   code: string
   name: string
   center: { lat: number; lng: number }
+  zoom?: number
 }

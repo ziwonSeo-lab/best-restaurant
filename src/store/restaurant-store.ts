@@ -110,49 +110,49 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
     set({ isLoading: true, error: null })
 
     try {
-      const [modelRes, blueribbonRes, bibgourmandRes, yeskidszoneRes, goodpriceRes] = await Promise.allSettled([
-        fetch(`${BASE_PATH}/data/${region}.json`),
-        fetch(`${BASE_PATH}/data/blueribbon-${region}.json`),
-        fetch(`${BASE_PATH}/data/bibgourmand-${region}.json`),
-        fetch(`${BASE_PATH}/data/yeskidszone-${region}.json`),
-        fetch(`${BASE_PATH}/data/goodprice-${region}.json`),
-      ])
+      const regionKeys = region === 'all'
+        ? Object.keys(REGIONS).filter((k) => k !== 'all')
+        : [region]
 
+      const loadForRegion = async (key: string): Promise<Restaurant[]> => {
+        const [modelRes, blueribbonRes, bibgourmandRes, yeskidszoneRes, goodpriceRes] = await Promise.allSettled([
+          fetch(`${BASE_PATH}/data/${key}.json`),
+          fetch(`${BASE_PATH}/data/blueribbon-${key}.json`),
+          fetch(`${BASE_PATH}/data/bibgourmand-${key}.json`),
+          fetch(`${BASE_PATH}/data/yeskidszone-${key}.json`),
+          fetch(`${BASE_PATH}/data/goodprice-${key}.json`),
+        ])
+
+        const result: Restaurant[] = []
+
+        if (modelRes.status === 'fulfilled' && modelRes.value.ok) {
+          const data: Restaurant[] = await modelRes.value.json()
+          result.push(...data.map((r) => ({ ...r, source: (r.source || 'model') as RestaurantSource })))
+        }
+        if (blueribbonRes.status === 'fulfilled' && blueribbonRes.value.ok) {
+          const data: Restaurant[] = await blueribbonRes.value.json()
+          result.push(...data.map((r) => ({ ...r, source: (r.source || 'blueribbon') as RestaurantSource })))
+        }
+        if (bibgourmandRes.status === 'fulfilled' && bibgourmandRes.value.ok) {
+          const data: Restaurant[] = await bibgourmandRes.value.json()
+          result.push(...data.map((r) => ({ ...r, source: (r.source || 'bibgourmand') as RestaurantSource })))
+        }
+        if (yeskidszoneRes.status === 'fulfilled' && yeskidszoneRes.value.ok) {
+          const data: Restaurant[] = await yeskidszoneRes.value.json()
+          result.push(...data.map((r) => ({ ...r, source: (r.source || 'yeskidszone') as RestaurantSource })))
+        }
+        if (goodpriceRes.status === 'fulfilled' && goodpriceRes.value.ok) {
+          const data: Restaurant[] = await goodpriceRes.value.json()
+          result.push(...data.map((r) => ({ ...r, source: (r.source || 'goodprice') as RestaurantSource })))
+        }
+
+        return result
+      }
+
+      const regionResults = await Promise.allSettled(regionKeys.map(loadForRegion))
       const restaurants: Restaurant[] = []
-
-      if (modelRes.status === 'fulfilled' && modelRes.value.ok) {
-        const data: Restaurant[] = await modelRes.value.json()
-        restaurants.push(
-          ...data.map((r) => ({ ...r, source: (r.source || 'model') as RestaurantSource }))
-        )
-      }
-
-      if (blueribbonRes.status === 'fulfilled' && blueribbonRes.value.ok) {
-        const data: Restaurant[] = await blueribbonRes.value.json()
-        restaurants.push(
-          ...data.map((r) => ({ ...r, source: (r.source || 'blueribbon') as RestaurantSource }))
-        )
-      }
-
-      if (bibgourmandRes.status === 'fulfilled' && bibgourmandRes.value.ok) {
-        const data: Restaurant[] = await bibgourmandRes.value.json()
-        restaurants.push(
-          ...data.map((r) => ({ ...r, source: (r.source || 'bibgourmand') as RestaurantSource }))
-        )
-      }
-
-      if (yeskidszoneRes.status === 'fulfilled' && yeskidszoneRes.value.ok) {
-        const data: Restaurant[] = await yeskidszoneRes.value.json()
-        restaurants.push(
-          ...data.map((r) => ({ ...r, source: (r.source || 'yeskidszone') as RestaurantSource }))
-        )
-      }
-
-      if (goodpriceRes.status === 'fulfilled' && goodpriceRes.value.ok) {
-        const data: Restaurant[] = await goodpriceRes.value.json()
-        restaurants.push(
-          ...data.map((r) => ({ ...r, source: (r.source || 'goodprice') as RestaurantSource }))
-        )
+      for (const r of regionResults) {
+        if (r.status === 'fulfilled') restaurants.push(...r.value)
       }
 
       if (restaurants.length === 0) {
@@ -175,8 +175,8 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
   },
 
   checkAvailableRegions: async () => {
-    const keys = Object.keys(REGIONS)
-    const available: string[] = []
+    const keys = Object.keys(REGIONS).filter((k) => k !== 'all')
+    const available: string[] = ['all'] // 전국은 항상 사용 가능
 
     // 순차적으로 체크하여 dev 서버 과부하 방지
     const dataFiles = ['', 'blueribbon-', 'goodprice-']
@@ -198,7 +198,7 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
       }
     }
 
-    set({ availableRegions: available.length > 0 ? available : [DEFAULT_REGION] })
+    set({ availableRegions: available })
   },
 
   setMapBounds: (mapBounds) => set({ mapBounds }),
