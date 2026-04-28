@@ -10,7 +10,8 @@
     "build-data": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --env-file=.env --import tsx src/scripts/build-data.ts",
     "build-blueribbon": "NODE_TLS_REJECT_UNAUTHORIZED=0 node --import tsx src/scripts/build-blueribbon-data.ts",
     "build-bibgourmand": "node --import tsx src/scripts/build-bibgourmand-data.ts",
-    "build-yeskidszone": "node --env-file=.env --import tsx src/scripts/build-yeskidszone-data.ts"
+    "build-yeskidszone": "node --env-file=.env --import tsx src/scripts/build-yeskidszone-data.ts",
+    "build-safefood": "node --import tsx src/scripts/build-safefood-data.ts"
   },
   "dependencies": {
     "iconv-lite": "^0.7.2",

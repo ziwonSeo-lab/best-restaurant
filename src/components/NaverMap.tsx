@@ -41,7 +41,23 @@ function getSourceBadgeHtml(restaurant: Restaurant): string {
   if (restaurant.source === 'goodprice') {
     return `<span style="font-size: 11px; padding: 1px 6px; background: #fef3c7; color: #b45309; border-radius: 8px;">착한가격 💰</span>`
   }
+  if (restaurant.source === 'safefood') {
+    return `<span style="font-size: 11px; padding: 1px 6px; background: #f0fdfa; color: #0f766e; border-radius: 8px;">식품안심 🛡️</span>`
+  }
   return `<span style="font-size: 11px; padding: 1px 6px; background: #eafaf1; color: #27ae60; border-radius: 8px;">모범식당</span>`
+}
+
+function getSafeFoodBadgeHtml(restaurant: Restaurant): string {
+  if (!restaurant.safeFoodGrade && restaurant.source !== 'safefood') return ''
+  const grade = restaurant.safeFoodGrade || ''
+  const gradeColor: Record<string, string> = {
+    '매우우수': '#0f766e',
+    '우수': '#0891b2',
+    '좋음': '#0284c7',
+    '적합': '#475569',
+  }
+  const color = gradeColor[grade] || '#475569'
+  return `<span style="font-size: 11px; padding: 1px 6px; background: #f0fdfa; color: ${color}; border-radius: 8px; border: 1px solid #99f6e4;">🛡️ 식품안심 ${grade}</span>`
 }
 
 function buildPopupContent(restaurant: Restaurant): string {
@@ -98,6 +114,7 @@ function buildPopupContent(restaurant: Restaurant): string {
         ${priceLabelHtml}
         ${restaurant.foodType ? `<span style="font-size: 11px; padding: 1px 6px; background: #f0f7ff; color: #0066cc; border-radius: 8px;">${restaurant.foodType}</span>` : ''}
         ${restaurant.mainFood ? `<span style="font-size: 11px; padding: 1px 6px; background: #fff7f0; color: #cc6600; border-radius: 8px;">${restaurant.mainFood}</span>` : ''}
+        ${getSafeFoodBadgeHtml(restaurant)}
       </div>
       ${reviewHtml}
       ${michelinDescHtml}

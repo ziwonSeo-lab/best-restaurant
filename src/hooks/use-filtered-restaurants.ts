@@ -28,7 +28,12 @@ export function useFilteredRestaurants() {
     }
 
     if (sourceFilter) {
-      data = data.filter((r) => r.source === sourceFilter)
+      if (sourceFilter === 'safefood') {
+        // 식품안심: 독립 소스이거나 기존 업소에 등급이 병합된 경우 포함
+        data = data.filter((r) => r.source === 'safefood' || !!r.safeFoodGrade)
+      } else {
+        data = data.filter((r) => r.source === sourceFilter)
+      }
     }
 
     if (recentOnly) {

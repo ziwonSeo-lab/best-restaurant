@@ -45,14 +45,18 @@ export default function FilterPanel() {
     let bibgourmand = 0
     let yeskidszone = 0
     let goodprice = 0
+    let safefood = 0
     for (const r of allRestaurants) {
       if (r.source === 'blueribbon') blueribbon++
       else if (r.source === 'bibgourmand') bibgourmand++
       else if (r.source === 'yeskidszone') yeskidszone++
       else if (r.source === 'goodprice') goodprice++
+      else if (r.source === 'safefood') safefood++
       else model++
+      // 기존 업소에 식품안심 등급이 병합된 경우 별도 카운트
+      if (r.source !== 'safefood' && r.safeFoodGrade) safefood++
     }
-    return { model, blueribbon, bibgourmand, yeskidszone, goodprice, total: allRestaurants.length }
+    return { model, blueribbon, bibgourmand, yeskidszone, goodprice, safefood, total: allRestaurants.length }
   }, [allRestaurants])
 
   const sourceFilteredRestaurants = useMemo(() => {
@@ -157,6 +161,19 @@ export default function FilterPanel() {
             }`}
           >
             착한가격 {sourceCounts.goodprice}
+          </button>
+        )}
+        {sourceCounts.safefood > 0 && (
+          <button
+            onClick={() => { setSource(selectedSource === 'safefood' ? '' : 'safefood'); setShowFavoritesOnly(false) }}
+            title="식약처 인증 식품안심업소 (적합·좋음·우수·매우우수)"
+            className={`${baseBtn} ${
+              selectedSource === 'safefood'
+                ? 'bg-teal-600 text-white'
+                : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
+            }`}
+          >
+            식품안심 {sourceCounts.safefood}
           </button>
         )}
         <button

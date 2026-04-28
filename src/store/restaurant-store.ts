@@ -114,13 +114,17 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
         ? Object.keys(REGIONS).filter((k) => k !== 'all')
         : [region]
 
+      const normName = (s: string) =>
+        s.toLowerCase().replace(/[\s()（）\[\]·.]/g, '')
+
       const loadForRegion = async (key: string): Promise<Restaurant[]> => {
-        const [modelRes, blueribbonRes, bibgourmandRes, yeskidszoneRes, goodpriceRes] = await Promise.allSettled([
+        const [modelRes, blueribbonRes, bibgourmandRes, yeskidszoneRes, goodpriceRes, safefoodRes] = await Promise.allSettled([
           fetch(`${BASE_PATH}/data/${key}.json`),
           fetch(`${BASE_PATH}/data/blueribbon-${key}.json`),
           fetch(`${BASE_PATH}/data/bibgourmand-${key}.json`),
           fetch(`${BASE_PATH}/data/yeskidszone-${key}.json`),
           fetch(`${BASE_PATH}/data/goodprice-${key}.json`),
+          fetch(`${BASE_PATH}/data/safefood-${key}.json`),
         ])
 
         const result: Restaurant[] = []
@@ -144,6 +148,25 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
         if (goodpriceRes.status === 'fulfilled' && goodpriceRes.value.ok) {
           const data: Restaurant[] = await goodpriceRes.value.json()
           result.push(...data.map((r) => ({ ...r, source: (r.source || 'goodprice') as RestaurantSource })))
+        }
+
+        // 식품안심업소: 기존 식당에 등급 병합, 미매칭은 신규 추가
+        if (safefoodRes.status === 'fulfilled' && safefoodRes.value.ok) {
+          const safefoodData: Restaurant[] = await safefoodRes.value.json()
+          // 이름 기반 빠른 조회 맵
+          const nameMap = new Map<string, Restaurant>()
+          for (const r of result) nameMap.set(normName(r.name), r)
+
+          for (const sf of safefoodData) {
+            const existing = nameMap.get(normName(sf.name))
+            if (existing) {
+              // 기존 업소에 식품안심 등급 추가
+              existing.safeFoodGrade = sf.safeFoodGrade
+              existing.safeFoodCertNo = sf.safeFoodCertNo
+            } else {
+              result.push({ ...sf, source: 'safefood' as RestaurantSource })
+            }
+          }
         }
 
         return result

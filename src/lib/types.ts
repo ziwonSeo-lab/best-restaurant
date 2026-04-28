@@ -1,4 +1,4 @@
-export type RestaurantSource = 'model' | 'blueribbon' | 'bibgourmand' | 'yeskidszone' | 'goodprice'
+export type RestaurantSource = 'model' | 'blueribbon' | 'bibgourmand' | 'yeskidszone' | 'goodprice' | 'safefood'
 export type RibbonType = 'RIBBON_ONE' | 'RIBBON_TWO' | 'RIBBON_THREE'
 
 // 0=일, 1=월, 2=화, 3=수, 4=목, 5=금, 6=토 (JS Date.getDay() 기준)
@@ -36,6 +36,8 @@ export interface Restaurant {
   strollerFriendly?: boolean
   goodpriceMenus?: { name: string; price: string }[]
   businessHours?: BusinessHours
+  safeFoodGrade?: string   // 식품안심업소 지정등급: 적합|좋음|우수|매우우수
+  safeFoodCertNo?: string  // 지정번호
 }
 
 export interface RawRestaurantCSV {
