@@ -184,7 +184,8 @@ function readXlsx(filePath: string): SafeFoodRow[] {
 
 async function buildRegionData(
   regionKey: string,
-  allRows: SafeFoodRow[]
+  allRows: SafeFoodRow[],
+  skipGeocode = false
 ): Promise<void> {
   const regionName = REGION_NAMES[regionKey]
   const outputPath = join(DATA_DIR, `safefood-${regionKey}.json`)
@@ -259,43 +260,47 @@ async function buildRegionData(
       continue
     }
 
-    // 3) Nominatim 지오코딩
-    const coords = await geocode(row.address)
-    if (coords) {
-      restaurants.push({
-        id,
-        name: row.name,
-        address: row.address,
-        jibunAddress: '',
-        phone: '',
-        foodType: '',
-        mainFood: '',
-        designatedDate: row.designatedDate,
-        lat: coords.lat,
-        lng: coords.lng,
-        region: regionName,
-        source: 'safefood',
-        safeFoodGrade: row.grade,
-        safeFoodCertNo: row.certNo,
-      })
-      geocodedCount++
+    // 3) Nominatim 지오코딩 (--skip-geocode 없을 때만)
+    if (!skipGeocode) {
+      const coords = await geocode(row.address)
+      if (coords) {
+        restaurants.push({
+          id,
+          name: row.name,
+          address: row.address,
+          jibunAddress: '',
+          phone: '',
+          foodType: '',
+          mainFood: '',
+          designatedDate: row.designatedDate,
+          lat: coords.lat,
+          lng: coords.lng,
+          region: regionName,
+          source: 'safefood',
+          safeFoodGrade: row.grade,
+          safeFoodCertNo: row.certNo,
+        })
+        geocodedCount++
+      } else {
+        failedCount++
+      }
+
+      // 200건마다 중간 저장
+      if ((i + 1) % 200 === 0 && restaurants.length > 0) {
+        writeFileSync(outputPath, JSON.stringify(restaurants), 'utf-8')
+      }
+
+      await new Promise((r) => setTimeout(r, 1200))
     } else {
-      failedCount++
+      failedCount++ // geocode 스킵
     }
 
     if ((i + 1) % 50 === 0 || i === regionRows.length - 1) {
       const pct = (((i + 1) / regionRows.length) * 100).toFixed(1)
       process.stdout.write(
-        `\r  ${i + 1}/${regionRows.length} (${pct}%) | 캐시: ${fromCoordCache} | 자체캐시: ${fromSelfCache} | geocoded: ${geocodedCount} | 실패: ${failedCount}`
+        `\r  ${i + 1}/${regionRows.length} (${pct}%) | 캐시: ${fromCoordCache} | 자체캐시: ${fromSelfCache} | geocoded: ${geocodedCount} | 스킵/실패: ${failedCount}`
       )
     }
-
-    // 200건마다 중간 저장
-    if ((i + 1) % 200 === 0 && restaurants.length > 0) {
-      writeFileSync(outputPath, JSON.stringify(restaurants), 'utf-8')
-    }
-
-    await new Promise((r) => setTimeout(r, 1200))
   }
 
   console.log('')
@@ -305,14 +310,15 @@ async function buildRegionData(
   console.log(`   캐시재사용: ${fromCoordCache}, 자체캐시: ${fromSelfCache}, geocoded: ${geocodedCount}, 실패: ${failedCount}`)
 }
 
-// CLI: npx tsx src/scripts/build-safefood-data.ts [region|all] [--file path/to/xlsx]
+// CLI: npx tsx src/scripts/build-safefood-data.ts [region|all] [--file path] [--skip-geocode]
 const args = process.argv.slice(2)
 const fileArgIdx = args.indexOf('--file')
 const xlsxPath = fileArgIdx !== -1
   ? args[fileArgIdx + 1]
   : join(process.cwd(), '★식품안심업소_지정현황(26.04.06기준).xlsx')
+const skipGeocode = args.includes('--skip-geocode')
 const regionArg = args.find(
-  (a, i) => a !== '--file' && (fileArgIdx === -1 || i !== fileArgIdx + 1)
+  (a, i) => a !== '--file' && a !== '--skip-geocode' && (fileArgIdx === -1 || i !== fileArgIdx + 1)
 ) ?? 'all'
 
 async function main() {
@@ -321,13 +327,15 @@ async function main() {
     process.exit(1)
   }
 
+  if (skipGeocode) console.log('※ --skip-geocode: Nominatim 지오코딩 건너뜀 (캐시 히트만 저장)')
+
   console.log(`XLSX 로드: ${xlsxPath}`)
   const allRows = readXlsx(xlsxPath)
   console.log(`전체 데이터: ${allRows.length}건`)
 
   const regions = regionArg === 'all' ? Object.keys(REGION_NAMES) : [regionArg]
   for (const region of regions) {
-    await buildRegionData(region, allRows)
+    await buildRegionData(region, allRows, skipGeocode)
   }
 }
 
