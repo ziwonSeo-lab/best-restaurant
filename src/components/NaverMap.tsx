@@ -167,9 +167,14 @@ export default function NaverMapComponent({
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<naver.maps.Map | null>(null)
   const markersRef = useRef<naver.maps.Marker[]>([])
+  const markerMapRef = useRef<Map<string, naver.maps.Marker>>(new Map())
+  const restaurantMapRef = useRef<Map<string, Restaurant>>(new Map())
   const clusteringRef = useRef<MarkerClustering | null>(null)
   const infoWindowRef = useRef<naver.maps.InfoWindow | null>(null)
   const locationMarkerRef = useRef<naver.maps.Marker | null>(null)
+  const prevSelectedIdRef = useRef<string | null>(null)
+  // ref로 selectedRestaurant를 추적해 마커 전체 재생성 없이 아이콘만 교체
+  const selectedRestaurantRef = useRef<Restaurant | null>(null)
   const [sdkReady, setSdkReady] = useState(false)
 
   const userLocation = useRestaurantStore((s) => s.userLocation)
@@ -303,18 +308,25 @@ export default function NaverMapComponent({
     mapRef.current.setZoom(zoom, true)
   }, [center, zoom])
 
-  // 마커 업데이트
+  // selectedRestaurant ref 동기화 (마커 전체 재생성 없이 icon만 교체하기 위해)
+  useEffect(() => {
+    selectedRestaurantRef.current = selectedRestaurant
+  }, [selectedRestaurant])
+
+  // 마커 전체 재생성 — restaurants/favoriteIds/sdkReady 변경 시만 실행
   useEffect(() => {
     if (!sdkReady || !mapRef.current) return
 
-    // 기존 마커 제거
     markersRef.current.forEach((m) => m.setMap(null))
     markersRef.current = []
     clusteringRef.current?.setMap(null)
     clusteringRef.current = null
+    markerMapRef.current.clear()
+    restaurantMapRef.current.clear()
+    prevSelectedIdRef.current = null
 
     const favoriteSet = new Set(favoriteIds)
-    const selectedId = selectedRestaurant?.id || null
+    const selectedId = selectedRestaurantRef.current?.id ?? null
 
     const newMarkers = restaurants
       .filter((r) => r.lat && r.lng)
@@ -341,10 +353,13 @@ export default function NaverMapComponent({
           onMarkerClick?.(restaurant)
         })
 
+        markerMapRef.current.set(restaurant.id, marker)
+        restaurantMapRef.current.set(restaurant.id, restaurant)
         return marker
       })
 
     markersRef.current = newMarkers
+    prevSelectedIdRef.current = selectedId
 
     clusteringRef.current = new MarkerClustering({
       map: mapRef.current,
@@ -364,7 +379,48 @@ export default function NaverMapComponent({
         if (target) target.textContent = String(count)
       },
     })
-  }, [restaurants, onMarkerClick, favoriteIds, selectedRestaurant, sdkReady])
+  }, [restaurants, onMarkerClick, favoriteIds, sdkReady])
+
+  // 선택 상태만 변경 — 마커 2개 icon/zIndex만 교체 (전체 재생성 없음)
+  useEffect(() => {
+    if (!sdkReady) return
+    const favoriteSet = new Set(favoriteIds)
+    const prevId = prevSelectedIdRef.current
+    const newId = selectedRestaurant?.id ?? null
+
+    if (prevId === newId) return
+
+    if (prevId) {
+      const marker = markerMapRef.current.get(prevId)
+      const restaurant = restaurantMapRef.current.get(prevId)
+      if (marker && restaurant) {
+        const isFav = favoriteSet.has(prevId)
+        const spec = createMarkerIcon(restaurant, isFav, false)
+        marker.setIcon({
+          content: spec.content,
+          size: new window.naver.maps.Size(spec.size.width, spec.size.height),
+          anchor: new window.naver.maps.Point(spec.anchor.x, spec.anchor.y),
+        })
+        marker.setZIndex(isFav ? 500 : 100)
+      }
+    }
+
+    if (newId && selectedRestaurant) {
+      const marker = markerMapRef.current.get(newId)
+      if (marker) {
+        const isFav = favoriteSet.has(newId)
+        const spec = createMarkerIcon(selectedRestaurant, isFav, true)
+        marker.setIcon({
+          content: spec.content,
+          size: new window.naver.maps.Size(spec.size.width, spec.size.height),
+          anchor: new window.naver.maps.Point(spec.anchor.x, spec.anchor.y),
+        })
+        marker.setZIndex(1000)
+      }
+    }
+
+    prevSelectedIdRef.current = newId
+  }, [selectedRestaurant, sdkReady, favoriteIds])
 
   // GPS 위치 마커 업데이트
   useEffect(() => {
