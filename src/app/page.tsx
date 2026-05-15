@@ -1,17 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { useRestaurantStore } from '@/store/restaurant-store'
 import { useReportedStore } from '@/store/reported-store'
 import { useFilteredRestaurants } from '@/hooks/use-filtered-restaurants'
+import { useTabStore } from '@/store/tab-store'
 import { REGIONS, DEFAULT_REGION } from '@/lib/regions'
 import FilterPanel from '@/components/FilterPanel'
 import SearchBar from '@/components/SearchBar'
 import RestaurantCard from '@/components/RestaurantCard'
 import RandomButton from '@/components/RandomButton'
 import MapOverlayCounts from '@/components/MapOverlayCounts'
-import BottomNav, { type TabType } from '@/components/BottomNav'
+import BottomNav from '@/components/BottomNav'
 import CommunityTab from '@/components/tabs/CommunityTab'
 import MyRestaurantsTab from '@/components/tabs/MyRestaurantsTab'
 
@@ -28,7 +29,8 @@ const LeafletMap = dynamic(() => import('@/components/NaverMap'), {
 })
 
 export default function HomePage() {
-  const [activeTab, setActiveTab] = useState<TabType>('map')
+  const activeTab = useTabStore((s) => s.activeTab)
+  const setActiveTab = useTabStore((s) => s.setActiveTab)
 
   const region = useRestaurantStore((s) => s.region)
   const isLoading = useRestaurantStore((s) => s.isLoading)
@@ -56,7 +58,6 @@ export default function HomePage() {
 
   return (
     <div className="h-dvh flex flex-col bg-stone-50">
-      {/* 지도 탭 헤더 - 지도 탭일 때만 표시 */}
       {activeTab === 'map' && (
         <header className="flex-shrink-0 bg-white border-b border-stone-200/60 pt-safe">
           <div className="px-3 pt-2.5 pb-2">
@@ -77,7 +78,6 @@ export default function HomePage() {
         </header>
       )}
 
-      {/* 커뮤니티 탭 헤더 */}
       {activeTab === 'community' && (
         <header className="flex-shrink-0 bg-white border-b border-stone-200/60 pt-safe">
           <div className="px-4 pt-3 pb-3">
@@ -86,7 +86,6 @@ export default function HomePage() {
         </header>
       )}
 
-      {/* 내 식당 탭 헤더 */}
       {activeTab === 'my' && (
         <header className="flex-shrink-0 bg-white border-b border-stone-200/60 pt-safe">
           <div className="px-4 pt-3 pb-3">
@@ -95,9 +94,8 @@ export default function HomePage() {
         </header>
       )}
 
-      {/* 탭 콘텐츠 */}
       <div className="flex-1 overflow-hidden relative">
-        {/* 지도 탭 - 항상 마운트, 탭이 달라질 때 숨김 처리 */}
+        {/* 지도 탭 — 항상 마운트, 타 탭 전환 시 숨김 */}
         <div className={`absolute inset-0 ${activeTab === 'map' ? '' : 'invisible pointer-events-none'}`}>
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-stone-50">
@@ -143,14 +141,12 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* 커뮤니티 탭 */}
         {activeTab === 'community' && (
           <div className="absolute inset-0">
             <CommunityTab />
           </div>
         )}
 
-        {/* 내 식당 탭 */}
         {activeTab === 'my' && (
           <div className="absolute inset-0">
             <MyRestaurantsTab />
@@ -158,7 +154,6 @@ export default function HomePage() {
         )}
       </div>
 
-      {/* 하단 탭 네비게이션 */}
       <BottomNav activeTab={activeTab} onChange={setActiveTab} />
     </div>
   )

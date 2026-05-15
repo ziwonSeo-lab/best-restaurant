@@ -4,14 +4,15 @@ import { useState } from 'react'
 import { useMyRestaurantsStore } from '@/store/my-restaurants-store'
 import { useFavoritesStore } from '@/store/favorites-store'
 import { useRestaurantStore } from '@/store/restaurant-store'
+import { useTabStore } from '@/store/tab-store'
 
 type SubTab = 'reviews' | 'visited' | 'favorites' | 'wishlist'
 
 const SUB_TABS: { id: SubTab; label: string }[] = [
-  { id: 'reviews', label: '리뷰남긴' },
-  { id: 'visited', label: '가본식당' },
-  { id: 'favorites', label: '즐겨찾기' },
-  { id: 'wishlist', label: '가볼식당' },
+  { id: 'reviews', label: '내 리뷰' },
+  { id: 'visited', label: '가봤어' },
+  { id: 'favorites', label: '내식당' },
+  { id: 'wishlist', label: '가볼꺼야' },
 ]
 
 function StarRating({ rating }: { rating: number }) {
@@ -36,6 +37,36 @@ function formatDate(iso: string) {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`
 }
 
+function MapLinkButton({ restaurantId, name }: { restaurantId: string; name: string }) {
+  const allRestaurants = useRestaurantStore((s) => s.allRestaurants)
+  const setSelectedRestaurant = useRestaurantStore((s) => s.setSelectedRestaurant)
+  const setActiveTab = useTabStore((s) => s.setActiveTab)
+
+  const restaurant = allRestaurants.find((r) => r.id === restaurantId)
+
+  const handleClick = () => {
+    if (restaurant) {
+      setSelectedRestaurant(restaurant)
+      setActiveTab('map')
+    }
+  }
+
+  if (!restaurant) return null
+
+  return (
+    <button
+      onClick={handleClick}
+      className="flex items-center gap-1 px-2 py-1 text-[11px] font-medium text-stone-500 bg-stone-100 rounded-lg hover:bg-stone-200 transition-colors flex-shrink-0"
+    >
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+      </svg>
+      지도
+    </button>
+  )
+}
+
 export default function MyRestaurantsTab() {
   const [activeSubTab, setActiveSubTab] = useState<SubTab>('reviews')
 
@@ -44,6 +75,7 @@ export default function MyRestaurantsTab() {
   const { favoriteIds, toggleFavorite } = useFavoritesStore()
   const allRestaurants = useRestaurantStore((s) => s.allRestaurants)
   const setSelectedRestaurant = useRestaurantStore((s) => s.setSelectedRestaurant)
+  const setActiveTab = useTabStore((s) => s.setActiveTab)
 
   const favoriteRestaurants = favoriteIds
     .map((id) => allRestaurants.find((r) => r.id === id))
@@ -59,9 +91,7 @@ export default function MyRestaurantsTab() {
               key={tab.id}
               onClick={() => setActiveSubTab(tab.id)}
               className={`relative px-3 py-3 text-[12px] font-medium transition-colors ${
-                activeSubTab === tab.id
-                  ? 'text-stone-800'
-                  : 'text-stone-400'
+                activeSubTab === tab.id ? 'text-stone-800' : 'text-stone-400'
               }`}
             >
               {tab.label}
@@ -94,6 +124,9 @@ export default function MyRestaurantsTab() {
                         {r.text && (
                           <p className="text-[12px] text-stone-600 mt-1.5 leading-relaxed">{r.text}</p>
                         )}
+                        <div className="mt-2">
+                          <MapLinkButton restaurantId={r.restaurantId} name={r.name} />
+                        </div>
                       </div>
                       <button
                         onClick={() => removeReview(r.restaurantId)}
@@ -126,7 +159,10 @@ export default function MyRestaurantsTab() {
                         {v.note && (
                           <p className="text-[12px] text-stone-600 mt-1">{v.note}</p>
                         )}
-                        <p className="text-[11px] text-stone-400 mt-0.5">방문: {formatDate(v.visitedAt)}</p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-[11px] text-stone-400">방문: {formatDate(v.visitedAt)}</span>
+                          <MapLinkButton restaurantId={v.restaurantId} name={v.name} />
+                        </div>
                       </div>
                       <button
                         onClick={() => removeVisit(v.restaurantId)}
@@ -147,7 +183,7 @@ export default function MyRestaurantsTab() {
         {activeSubTab === 'favorites' && (
           <div>
             {favoriteRestaurants.length === 0 ? (
-              <EmptyState icon="❤️" message="즐겨찾기한 식당이 없어요" subMessage="지도에서 식당을 눌러 즐겨찾기에 추가해보세요" />
+              <EmptyState icon="❤️" message="내식당에 추가된 식당이 없어요" subMessage="지도에서 식당을 눌러 즐겨찾기에 추가해보세요" />
             ) : (
               <ul className="divide-y divide-stone-100">
                 {favoriteRestaurants.map((r) => {
@@ -157,7 +193,10 @@ export default function MyRestaurantsTab() {
                       <div className="flex items-center justify-between gap-2">
                         <button
                           className="flex-1 min-w-0 text-left"
-                          onClick={() => setSelectedRestaurant(r)}
+                          onClick={() => {
+                            setSelectedRestaurant(r)
+                            setActiveTab('map')
+                          }}
                         >
                           <p className="text-[13px] font-semibold text-stone-800 truncate">{r.name}</p>
                           <p className="text-[11px] text-stone-400 truncate mt-0.5">{r.address}</p>
@@ -182,7 +221,7 @@ export default function MyRestaurantsTab() {
         {activeSubTab === 'wishlist' && (
           <div>
             {wishlist.length === 0 ? (
-              <EmptyState icon="🎯" message="가볼 식당 목록이 비었어요" subMessage="지도에서 식당을 눌러 가볼식당에 추가해보세요" />
+              <EmptyState icon="🎯" message="가볼꺼야 목록이 비었어요" subMessage="지도에서 식당을 눌러 추가해보세요" />
             ) : (
               <ul className="divide-y divide-stone-100">
                 {wishlist.map((w) => (
@@ -191,7 +230,10 @@ export default function MyRestaurantsTab() {
                       <div className="flex-1 min-w-0">
                         <p className="text-[13px] font-semibold text-stone-800 truncate">{w.name}</p>
                         <p className="text-[11px] text-stone-400 truncate mt-0.5">{w.address}</p>
-                        <p className="text-[11px] text-stone-400 mt-0.5">추가: {formatDate(w.addedAt)}</p>
+                        <div className="flex items-center gap-2 mt-1.5">
+                          <span className="text-[11px] text-stone-400">추가: {formatDate(w.addedAt)}</span>
+                          <MapLinkButton restaurantId={w.restaurantId} name={w.name} />
+                        </div>
                       </div>
                       <button
                         onClick={() => removeWishlist(w.restaurantId)}

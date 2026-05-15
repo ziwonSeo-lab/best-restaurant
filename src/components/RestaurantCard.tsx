@@ -416,7 +416,7 @@ export default function RestaurantCard({
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
             </svg>
-            {visited ? '가봤어요' : '가봤어요'}
+            가봤어
           </button>
           <button
             onClick={() => wishlisted ? removeWishlist(restaurant.id) : addWishlist({
@@ -432,7 +432,7 @@ export default function RestaurantCard({
             <svg className="w-3.5 h-3.5" fill={wishlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
             </svg>
-            {wishlisted ? '가볼예정' : '가볼게요'}
+            가볼꺼야
           </button>
           <button
             onClick={() => setShowReviewForm((v) => !v)}
