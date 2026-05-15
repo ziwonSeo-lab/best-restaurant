@@ -42,6 +42,10 @@ const DUMMY_VISITS: VisitEntry[] = [
   { restaurantId: '4181000-101-1972-00001', name: '샘밭막국수', address: '강원특별자치도 춘천시 신북읍 신샘밭로 644', region: '강원특별자치도', visitedAt: ago(62) },
   { restaurantId: 'bibgourmand-132645', name: '옥돌현옥', address: '송파구 오금로 36길 26-1', region: '서울특별시', visitedAt: ago(75), note: '갈비찜 강추. 미쉐린 받을만해요' },
   { restaurantId: '6510000-101-1976-00070', name: '도두', address: '제주특별자치도 제주시 도두3길 48 (도두일동)', region: '제주특별자치도', visitedAt: ago(90) },
+  { restaurantId: '3490000-101-1962-00001', name: '진흥각', address: '인천광역시 중구 신포로23번길 20, 1,2,3층 (중앙동4가)', region: '인천광역시', visitedAt: ago(105), note: '인천 차이나타운 옆 오래된 중화요리 맛집' },
+  { restaurantId: '3640000-101-1971-00001', name: '한밭식당', address: '대전광역시 동구 태전로 3 (중동)', region: '대전광역시', visitedAt: ago(118) },
+  { restaurantId: '5310000-101-1976-00048', name: '육거리곰탕', address: '경상남도 진주시 망경로 303 (강남동)', region: '경상남도', visitedAt: ago(130), note: '진주 곰탕 원조집. 진한 국물이 일품' },
+  { restaurantId: '4800000-101-1982-00002', name: '영란횟집', address: '전라남도 목포시 번화로 42-1 (만호동)', region: '전라남도', visitedAt: ago(145) },
 ]
 
 const DUMMY_WISHLIST: WishlistEntry[] = [
@@ -52,6 +56,10 @@ const DUMMY_WISHLIST: WishlistEntry[] = [
   { restaurantId: '3750000-101-1984-00024', name: '삼풍가든', address: '경기도 수원시 장안구 서부로 2388 (이목동)', region: '경기도', addedAt: ago(23) },
   { restaurantId: 'blueribbon-28185', name: '트웰브키친', address: '대구광역시 수성구 무학로11길 10', region: '대구광역시', addedAt: ago(30) },
   { restaurantId: '6510000-101-1976-00123', name: '원조소라횟집', address: '제주특별자치도 제주시 서부두길 18-2, 1~3층 (건입동)', region: '제주특별자치도', addedAt: ago(40) },
+  { restaurantId: '3590000-101-1969-00002', name: '신성', address: '광주광역시 동구 충장로 101-17 (충장로1가)', region: '광주광역시', addedAt: ago(48) },
+  { restaurantId: 'blueribbon-4378', name: '강천매운탕', address: '경기도 여주시 강천면 강천리길 85', region: '경기도', addedAt: ago(55) },
+  { restaurantId: '3690000-101-1985-00017', name: '궁중삼계탕', address: '울산광역시 중구 먹자거리 6 (성남동)', region: '울산광역시', addedAt: ago(63) },
+  { restaurantId: '4390000-101-1982-00039', name: '영화식당', address: '충청북도 충주시 수안보면 물탕1길 11', region: '충청북도', addedAt: ago(70) },
 ]
 
 const DUMMY_REVIEWS: ReviewEntry[] = [
@@ -149,13 +157,16 @@ export const useMyRestaurantsStore = create<MyRestaurantsState>()(
     }),
     {
       name: 'best-restaurant-my',
-      version: 1,
+      version: 2,
       migrate: (state: unknown) => {
         const s = state as Partial<MyRestaurantsState>
+        // v2: 더미 데이터 확장 — 기존 더미(8개 이하)는 새 세트로 교체
+        const hasDummyVisits = !s.visits || s.visits.length <= 8
+        const hasDummyWishlist = !s.wishlist || s.wishlist.length <= 7
         return {
           ...s,
-          visits: (s.visits && s.visits.length > 0) ? s.visits : DUMMY_VISITS,
-          wishlist: (s.wishlist && s.wishlist.length > 0) ? s.wishlist : DUMMY_WISHLIST,
+          visits: hasDummyVisits ? DUMMY_VISITS : s.visits,
+          wishlist: hasDummyWishlist ? DUMMY_WISHLIST : s.wishlist,
           reviews: (s.reviews && s.reviews.length > 0) ? s.reviews : DUMMY_REVIEWS,
           seedFavorites: s.seedFavorites ?? DUMMY_FAVORITES,
         }
