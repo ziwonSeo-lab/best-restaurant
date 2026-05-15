@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import type { Restaurant } from '@/lib/types'
 import { useFavoritesStore } from '@/store/favorites-store'
 import { useReportedStore } from '@/store/reported-store'
+import { useMyRestaurantsStore } from '@/store/my-restaurants-store'
 import { formatDesignatedDate, isOlderThanYears } from '@/lib/date-utils'
 
 function getShortAddress(restaurant: Restaurant): string {
@@ -81,10 +83,74 @@ function SourceBadge({ restaurant }: { restaurant: Restaurant }) {
   )
 }
 
+function ReviewForm({
+  restaurant,
+  onClose,
+}: {
+  restaurant: Restaurant
+  onClose: () => void
+}) {
+  const { getReview, upsertReview, removeReview } = useMyRestaurantsStore()
+  const existing = getReview(restaurant.id)
+  const [rating, setRating] = useState(existing?.rating ?? 0)
+  const [text, setText] = useState(existing?.text ?? '')
+
+  const handleSave = () => {
+    if (!rating) return
+    upsertReview({
+      restaurantId: restaurant.id,
+      name: restaurant.name,
+      address: restaurant.address || restaurant.jibunAddress || '',
+      region: restaurant.region,
+      rating,
+      text,
+    })
+    onClose()
+  }
+
+  return (
+    <div className="mt-3 p-3 bg-stone-50 rounded-xl border border-stone-200">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-[12px] font-semibold text-stone-700">리뷰 작성</span>
+        {existing && (
+          <button
+            onClick={() => { removeReview(restaurant.id); onClose() }}
+            className="text-[11px] text-red-400"
+          >
+            삭제
+          </button>
+        )}
+      </div>
+      <div className="flex items-center gap-1 mb-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <button key={i} onClick={() => setRating(i + 1)}>
+            <svg className={`w-6 h-6 ${i < rating ? 'text-amber-400' : 'text-stone-200'}`} fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+          </button>
+        ))}
+        <span className="text-[11px] text-stone-400 ml-1">{rating > 0 ? `${rating}점` : '별점 선택'}</span>
+      </div>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="한 줄 감상을 남겨보세요 (선택)"
+        rows={2}
+        className="w-full text-[12px] px-2.5 py-2 rounded-lg border border-stone-200 focus:outline-none focus:border-stone-400 resize-none bg-white"
+      />
+      <div className="flex gap-2 mt-2">
+        <button onClick={onClose} className="flex-1 py-1.5 rounded-lg text-[12px] bg-stone-100 text-stone-500">취소</button>
+        <button onClick={handleSave} disabled={!rating} className="flex-1 py-1.5 rounded-lg text-[12px] bg-stone-800 text-white disabled:opacity-40">저장</button>
+      </div>
+    </div>
+  )
+}
+
 export default function RestaurantCard({
   restaurant,
   onClose,
 }: RestaurantCardProps) {
+  const [showReviewForm, setShowReviewForm] = useState(false)
   const isBlueRibbon = restaurant.source === 'blueribbon'
   const isBibGourmand = restaurant.source === 'bibgourmand'
   const isYesKidsZone = restaurant.source === 'yeskidszone'
@@ -93,6 +159,11 @@ export default function RestaurantCard({
   const toggleFavorite = useFavoritesStore((s) => s.toggleFavorite)
   const isReported = useReportedStore((s) => s.isReported(restaurant.id))
   const toggleReport = useReportedStore((s) => s.toggleReport)
+  const { isVisited, addVisit, removeVisit, isWishlisted, addWishlist, removeWishlist, getReview } =
+    useMyRestaurantsStore()
+  const visited = isVisited(restaurant.id)
+  const wishlisted = isWishlisted(restaurant.id)
+  const hasReview = !!getReview(restaurant.id)
 
   return (
     <div className={`rounded-t-2xl shadow-[0_-4px_24px_rgba(0,0,0,0.08)] border-t border-stone-200/60 animate-slide-up ${isReported ? 'bg-stone-50' : 'bg-white'}`}>
@@ -328,6 +399,57 @@ export default function RestaurantCard({
             </button>
           )}
         </div>
+
+        {/* 내 식당 액션 */}
+        <div className="flex gap-2 mt-2">
+          <button
+            onClick={() => visited ? removeVisit(restaurant.id) : addVisit({
+              restaurantId: restaurant.id,
+              name: restaurant.name,
+              address: restaurant.address || restaurant.jibunAddress || '',
+              region: restaurant.region,
+            })}
+            className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
+              visited ? 'bg-stone-800 text-white' : 'bg-stone-100 text-stone-500'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            {visited ? '가봤어요' : '가봤어요'}
+          </button>
+          <button
+            onClick={() => wishlisted ? removeWishlist(restaurant.id) : addWishlist({
+              restaurantId: restaurant.id,
+              name: restaurant.name,
+              address: restaurant.address || restaurant.jibunAddress || '',
+              region: restaurant.region,
+            })}
+            className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
+              wishlisted ? 'bg-amber-500 text-white' : 'bg-stone-100 text-stone-500'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" fill={wishlisted ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+            </svg>
+            {wishlisted ? '가볼예정' : '가볼게요'}
+          </button>
+          <button
+            onClick={() => setShowReviewForm((v) => !v)}
+            className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-[12px] font-medium transition-colors cursor-pointer ${
+              hasReview || showReviewForm ? 'bg-teal-600 text-white' : 'bg-stone-100 text-stone-500'
+            }`}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
+            </svg>
+            {hasReview ? '리뷰 수정' : '리뷰 쓰기'}
+          </button>
+        </div>
+
+        {showReviewForm && (
+          <ReviewForm restaurant={restaurant} onClose={() => setShowReviewForm(false)} />
+        )}
       </div>
     </div>
   )
